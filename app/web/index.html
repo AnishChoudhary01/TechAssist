@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TechAssist – AI Technical Support</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">AI technical support assistant</p>
+          <h1>TechAssist</h1>
+          <p class="lede">Ask a question and inspect every step that turns your knowledge base into a troubleshooting response.</p>
+        </div>
+        <div class="system-badge" aria-label="RAG and Code Llama workflow">RAG + Code Llama</div>
+      </header>
+
+      <section class="question-panel" aria-labelledby="question-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Start here</p>
+            <h2 id="question-heading">What do you need help with?</h2>
+          </div>
+          <span id="request-status" class="status" aria-live="polite">Ready</span>
+        </div>
+        <form id="question-form">
+          <label for="question">Technical support question</label>
+          <textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="For example: My application cannot connect to the database after a configuration change. How should I troubleshoot it?"></textarea>
+          <div class="form-footer">
+            <span id="question-count">0 / 4000</span>
+            <button id="submit-button" type="submit">Analyze question</button>
+          </div>
+        </form>
+        <p id="error-message" class="error" role="alert" hidden></p>
+      </section>
+
+      <section class="flow-panel" aria-labelledby="flow-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Transparent answer generation</p>
+            <h2 id="flow-heading">Processing flow</h2>
+          </div>
+          <span id="flow-summary" class="muted">Submit a question to begin.</span>
+        </div>
+        <ol id="flow" class="flow-list" aria-live="polite">
+          <li data-stage="User question received"><span class="step-number">1</span><div><strong>User question</strong><small>Waiting for input</small></div></li>
+          <li data-stage="Knowledge base / RAG retrieval"><span class="step-number">2</span><div><strong>API → RAG</strong><small>Query embedding and ChromaDB similarity search</small></div></li>
+          <li data-stage="Relevant context assembled"><span class="step-number">3</span><div><strong>Relevant context</strong><small>Retrieved chunks added to the prompt</small></div></li>
+          <li data-stage="Ollama / Code Llama generation"><span class="step-number">4</span><div><strong>Ollama → Code Llama</strong><small>Grounded answer generation</small></div></li>
+          <li data-stage="Final response returned"><span class="step-number">5</span><div><strong>Final response</strong><small>Waiting for an answer</small></div></li>
+        </ol>
+      </section>
+
+      <section id="result-panel" class="results" aria-labelledby="result-heading" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Generated answer</p>
+            <h2 id="result-heading">Troubleshooting response</h2>
+          </div>
+          <div id="response-meta" class="response-meta"></div>
+        </div>
+        <article id="answer" class="answer" aria-live="polite"></article>
+
+        <div class="detail-grid">
+          <section class="detail-panel" aria-labelledby="context-heading">
+            <h3 id="context-heading">Retrieved context</h3>
+            <p id="context-summary" class="muted"></p>
+            <div id="sources" class="sources"></div>
+          </section>
+          <section class="detail-panel" aria-labelledby="llm-heading">
+            <h3 id="llm-heading">LLM information</h3>
+            <dl id="llm-info" class="llm-info"></dl>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

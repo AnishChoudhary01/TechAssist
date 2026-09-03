@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+chroma_data/
+data/knowledge_base/*
+!data/knowledge_base/.gitkeep
