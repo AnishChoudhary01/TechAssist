@@ -15,7 +15,7 @@ class StubGenerator:
         assert "Verify the configuration file." in prompt
         assert "Why does setup fail?" in prompt
         assert "TechAssist" in system_prompt
-        return "Check the configuration file.", "codellama:7b"
+        return "Check the configuration file.", "qwen2.5-coder:0.5b-instruct"
 
 
 def test_orchestrator_retrieves_context_before_generation() -> None:
@@ -24,10 +24,10 @@ def test_orchestrator_retrieves_context_before_generation() -> None:
     )
 
     assert answer == "Check the configuration file."
-    assert model == "codellama:7b"
+    assert model == "qwen2.5-coder:0.5b-instruct"
     assert sources[0].source == "install.md"
     assert [step.stage for step in trace] == [
         "Knowledge base / RAG retrieval",
         "Relevant context assembled",
-        "Ollama / Code Llama generation",
+        "Ollama / LLM generation",
     ]

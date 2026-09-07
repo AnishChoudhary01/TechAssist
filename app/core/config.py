@@ -30,8 +30,8 @@ def get_settings() -> Settings:
     return Settings(
         # Explicit IPv4 loopback avoids localhost/IPv6 resolution mismatches on Windows.
         ollama_base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/"),
-        ollama_model=os.getenv("OLLAMA_MODEL", "codellama:7b"),
-        # A cold local Code Llama request can take several minutes on CPU-only machines.
+        ollama_model=os.getenv("OLLAMA_MODEL", "qwen2.5-coder:0.5b-instruct"),
+        # A cold local model request can take several minutes on CPU-only machines.
         ollama_timeout_seconds=float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "300")),
         ollama_num_predict=int(os.getenv("OLLAMA_NUM_PREDICT", "256")),
         ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text"),

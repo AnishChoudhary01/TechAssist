@@ -10,7 +10,7 @@ router = APIRouter(prefix="/v1", tags=["generation"])
 
 
 def get_llm_client(settings: Settings = Depends(get_settings)) -> OllamaCodeLlamaClient:
-    """Create the Code Llama adapter used only by the LLM service."""
+    """Create the configured Ollama model adapter used only by the LLM service."""
     return OllamaCodeLlamaClient(settings)
 
 
@@ -19,7 +19,7 @@ async def generate_response(
     request: GenerationRequest,
     client: OllamaCodeLlamaClient = Depends(get_llm_client),
 ) -> GenerationResponse:
-    """Generate a response through Code Llama and Ollama."""
+    """Generate a response through the configured Ollama model."""
     try:
         answer, model = await client.generate(request.prompt, request.system_prompt)
     except OllamaConnectionError as error:

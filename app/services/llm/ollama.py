@@ -1,4 +1,4 @@
-"""Ollama adapter for Code Llama."""
+"""Ollama adapter for the configured local technical-support model."""
 
 import httpx
 
@@ -59,7 +59,7 @@ class OllamaCodeLlamaClient:
         self._num_predict = settings.ollama_num_predict
 
     async def generate(self, prompt: str, system_prompt: str) -> tuple[str, str]:
-        """Request a troubleshooting answer from the configured Code Llama model."""
+        """Request a troubleshooting answer from the configured Ollama model."""
         payload = {
             "model": self._model,
             "prompt": prompt,

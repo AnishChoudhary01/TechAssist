@@ -3,79 +3,74 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TechAssist – AI Technical Support</title>
+    <title>TechAssist – Technical Support</title>
     <link rel="stylesheet" href="/static/styles.css">
   </head>
   <body>
-    <main class="shell">
-      <header class="masthead">
-        <div>
-          <p class="eyebrow">AI technical support assistant</p>
-          <h1>TechAssist</h1>
-          <p class="lede">Ask a question and inspect every step that turns your knowledge base into a troubleshooting response.</p>
+    <div class="app-frame">
+      <aside class="sidebar" aria-label="Workspace navigation">
+        <a class="brand" href="/" aria-label="TechAssist workspace"><span class="brand-logo">✣</span><span><strong>TechAssist</strong><small>Private local AI</small></span></a>
+        <nav class="side-nav" aria-label="Primary navigation">
+          <a class="active" href="#knowledge-base"><span>⌂</span>Workspace</a>
+          <a href="#knowledge-base"><span>▣</span>Documents</a>
+          <a href="#live-trace"><span>◷</span>History</a>
+          <a href="#answer-card"><span>⚙</span>Settings</a>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="model-status"><span></span><div><strong>Local AI Ready</strong><small>Ollama · Local model</small></div></div>
+          <a href="#answer-card"><span>ⓘ</span>About</a>
         </div>
-        <div class="system-badge" aria-label="RAG and Code Llama workflow">RAG + Code Llama</div>
-      </header>
+      </aside>
 
-      <section class="question-panel" aria-labelledby="question-heading">
-        <div class="panel-heading">
-          <div>
-            <p class="section-kicker">Start here</p>
-            <h2 id="question-heading">What do you need help with?</h2>
-          </div>
-          <span id="request-status" class="status" aria-live="polite">Ready</span>
-        </div>
-        <form id="question-form">
-          <label for="question">Technical support question</label>
-          <textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="For example: My application cannot connect to the database after a configuration change. How should I troubleshoot it?"></textarea>
-          <div class="form-footer">
-            <span id="question-count">0 / 4000</span>
-            <button id="submit-button" type="submit">Analyze question</button>
-          </div>
-        </form>
-        <p id="error-message" class="error" role="alert" hidden></p>
-      </section>
+      <main class="workspace">
+        <header class="workspace-header">
+          <div><h1>Upload. Ask. <span>Understand.</span></h1><p>Build answers from your documents, with every retrieval and model step visible.</p></div>
+          <div class="ready-badge"><span></span>Local AI Ready</div>
+        </header>
 
-      <section class="flow-panel" aria-labelledby="flow-heading">
-        <div class="panel-heading">
-          <div>
-            <p class="section-kicker">Transparent answer generation</p>
-            <h2 id="flow-heading">Processing flow</h2>
-          </div>
-          <span id="flow-summary" class="muted">Submit a question to begin.</span>
-        </div>
-        <ol id="flow" class="flow-list" aria-live="polite">
-          <li data-stage="User question received"><span class="step-number">1</span><div><strong>User question</strong><small>Waiting for input</small></div></li>
-          <li data-stage="Knowledge base / RAG retrieval"><span class="step-number">2</span><div><strong>API → RAG</strong><small>Query embedding and ChromaDB similarity search</small></div></li>
-          <li data-stage="Relevant context assembled"><span class="step-number">3</span><div><strong>Relevant context</strong><small>Retrieved chunks added to the prompt</small></div></li>
-          <li data-stage="Ollama / Code Llama generation"><span class="step-number">4</span><div><strong>Ollama → Code Llama</strong><small>Grounded answer generation</small></div></li>
-          <li data-stage="Final response returned"><span class="step-number">5</span><div><strong>Final response</strong><small>Waiting for an answer</small></div></li>
-        </ol>
-      </section>
+        <section class="workflow">
+          <article id="knowledge-base" class="workflow-card knowledge-card" aria-labelledby="knowledge-heading">
+            <div class="step-marker">1</div>
+            <div class="card-head"><div><h2 id="knowledge-heading">Knowledge Base</h2><p>Upload and index your technical documents first.</p></div><div class="card-actions"><label class="sr-only" for="document-category">Category</label><input id="document-category" name="category" form="upload-form" type="text" maxlength="100" placeholder="Category (optional)"><button id="upload-button" class="button" form="upload-form" type="submit">Index document <span>›</span></button></div></div>
+            <form id="upload-form" class="knowledge-content">
+              <label id="drop-zone" class="drop-zone" for="document-file"><span class="upload-symbol">☁</span><strong id="file-label">Drag &amp; drop files here</strong><em>or browse</em><small>PDF, Markdown, TXT up to 50 MB</small><input id="document-file" name="file" type="file" accept=".pdf,.md,.txt,application/pdf,text/markdown,text/plain" required></label>
+              <section class="document-list" aria-labelledby="documents-heading"><div class="list-heading"><h3 id="documents-heading">Indexed documents <span id="document-count">(0)</span></h3><span id="knowledge-state" class="index-state">Waiting</span></div><div id="indexed-documents" class="indexed-documents"><p class="empty-documents">No documents indexed yet.</p></div></section>
+            </form>
+            <p id="upload-status" class="notice" aria-live="polite" hidden></p>
+          </article>
 
-      <section id="result-panel" class="results" aria-labelledby="result-heading" hidden>
-        <div class="panel-heading">
-          <div>
-            <p class="section-kicker">Generated answer</p>
-            <h2 id="result-heading">Troubleshooting response</h2>
-          </div>
-          <div id="response-meta" class="response-meta"></div>
-        </div>
-        <article id="answer" class="answer" aria-live="polite"></article>
+          <article class="workflow-card ask-card" aria-labelledby="ask-heading">
+            <div class="step-marker">2</div>
+            <div class="card-head"><div><h2 id="ask-heading">Ask</h2><p id="ask-guidance">Ask a technical question based on your indexed documents.</p></div><button id="submit-button" class="button" form="question-form" type="submit">Analyze issue <span>›</span></button></div>
+            <form id="question-form"><label class="sr-only" for="question">Technical support question</label><textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="Type your technical support question here..."></textarea><div class="question-footer"><span id="question-count">0 / 4000</span><span id="request-status" class="request-status" aria-live="polite">Ready</span></div></form>
+            <p id="error-message" class="notice notice-error" role="alert" hidden></p>
+          </article>
 
-        <div class="detail-grid">
-          <section class="detail-panel" aria-labelledby="context-heading">
-            <h3 id="context-heading">Retrieved context</h3>
-            <p id="context-summary" class="muted"></p>
-            <div id="sources" class="sources"></div>
-          </section>
-          <section class="detail-panel" aria-labelledby="llm-heading">
-            <h3 id="llm-heading">LLM information</h3>
+          <article id="live-trace" class="workflow-card trace-card" aria-labelledby="trace-heading">
+            <div class="step-marker">3</div>
+            <div class="card-head"><div><h2 id="trace-heading">Live System Trace</h2><p id="flow-summary">See every TechAssist step used to build the answer.</p></div><span class="chevron">⌃</span></div>
+            <ol id="flow" class="trace-flow" aria-live="polite">
+              <li data-stage="User question received"><span class="trace-icon">?</span><div><strong>Question received</strong><small>Waiting...</small></div></li>
+              <li data-stage="Knowledge base / RAG retrieval"><span class="trace-icon">▣</span><div><strong>Retrieving documents</strong><small>Waiting...</small></div></li>
+              <li data-stage="Knowledge base / RAG retrieval"><span class="trace-icon">◫</span><div><strong>Relevant chunks</strong><small>Waiting...</small></div></li>
+              <li data-stage="Relevant context assembled"><span class="trace-icon">▤</span><div><strong>Context assembled</strong><small>Waiting...</small></div></li>
+              <li data-stage="Ollama / LLM generation"><span class="trace-icon">✦</span><div><strong>Generating answer</strong><small>Waiting...</small></div></li>
+              <li data-stage="Final response returned"><span class="trace-icon">✓</span><div><strong>Answer ready</strong><small>Waiting...</small></div></li>
+            </ol>
+          </article>
+
+          <article id="answer-card" class="workflow-card analysis-card is-empty" aria-labelledby="analysis-heading">
+            <div class="step-marker">4</div>
+            <div class="card-head"><div><h2 id="analysis-heading">AI Analysis</h2><p>Answer with sources, grounded in your documents.</p></div><div id="response-meta" class="response-meta"></div></div>
+            <div class="analysis-layout">
+              <section class="answer-zone"><div id="answer-empty" class="answer-empty"><span>✦</span><div><strong>Your answer will appear here</strong><p>Upload documents and ask a question to get started.</p></div></div><article id="answer" class="answer" aria-live="polite"></article></section>
+              <section class="sources-zone" aria-labelledby="sources-heading"><div class="source-tabs"><strong id="sources-heading">Sources</strong><span>Relevant chunks</span></div><p id="context-summary" class="source-summary">No sources yet</p><div id="sources" class="sources"></div></section>
+            </div>
             <dl id="llm-info" class="llm-info"></dl>
-          </section>
-        </div>
-      </section>
-    </main>
+          </article>
+        </section>
+      </main>
+    </div>
     <script src="/static/app.js"></script>
   </body>
 </html>

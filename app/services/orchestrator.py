@@ -6,7 +6,7 @@ from typing import Protocol
 import httpx
 
 from app.core.config import Settings
-from app.models.knowledge import RetrievedChunk, RetrievalResponse
+from app.models.knowledge import IngestionResult, RetrievedChunk, RetrievalResponse
 from app.models.llm import GenerationResponse
 from app.models.support import ProcessingStep
 
@@ -62,9 +62,37 @@ class RAGServiceClient:
         except ValueError as error:
             raise UpstreamServiceError("RAG service", f"returned an invalid payload: {error}") from error
 
+    async def upload_document(
+        self,
+        filename: str,
+        content: bytes,
+        content_type: str | None,
+        category: str | None,
+    ) -> IngestionResult:
+        """Send one document to the RAG service for chunking and indexing."""
+        try:
+            form_data = {"category": category} if category else None
+            async with httpx.AsyncClient(timeout=self._timeout, trust_env=False) as client:
+                response = await client.post(
+                    f"{self._base_url}/v1/knowledge/documents",
+                    data=form_data,
+                    files={"file": (filename, content, content_type or "application/octet-stream")},
+                )
+                response.raise_for_status()
+            return IngestionResult.model_validate(response.json())
+        except httpx.HTTPStatusError as error:
+            raise UpstreamServiceError(
+                "RAG service",
+                f"returned HTTP {error.response.status_code}: {_response_detail(error.response)}",
+            ) from error
+        except httpx.RequestError as error:
+            raise UpstreamServiceError("RAG service", f"connection failed: {error}") from error
+        except ValueError as error:
+            raise UpstreamServiceError("RAG service", f"returned an invalid payload: {error}") from error
+
 
 class LLMServiceClient:
-    """HTTP client for the independent Code Llama service."""
+    """HTTP client for the independent Ollama-backed LLM service."""
 
     def __init__(self, settings: Settings) -> None:
         self._base_url = settings.llm_service_url
@@ -138,7 +166,7 @@ class TechnicalSupportOrchestrator:
                 detail="Added retrieved chunks to the grounded troubleshooting prompt.",
             ),
             ProcessingStep(
-                stage="Ollama / Code Llama generation",
+                stage="Ollama / LLM generation",
                 service="LLM service",
                 detail=f"Generated the troubleshooting response with {model} through Ollama.",
                 duration_ms=generation_duration,

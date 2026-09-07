@@ -14,7 +14,7 @@ def test_health_check() -> None:
 class StubSupportService:
     async def answer(self, question: str) -> tuple[str, str, list[object], list[object]]:
         assert question == "The service will not start"
-        return "Check the service logs and its configured port.", "codellama:7b", [], []
+        return "Check the service logs and its configured port.", "qwen2.5-coder:0.5b-instruct", [], []
 
 
 def test_ask_support_question() -> None:
@@ -29,7 +29,7 @@ def test_ask_support_question() -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["answer"] == "Check the service logs and its configured port."
-    assert body["model"] == "codellama:7b"
+    assert body["model"] == "qwen2.5-coder:0.5b-instruct"
     assert body["sources"] == []
     assert [step["stage"] for step in body["processing_trace"]] == [
         "User question received",

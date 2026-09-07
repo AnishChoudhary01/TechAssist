@@ -1,4 +1,4 @@
-"""LLM service entry point: Code Llama generation through Ollama."""
+"""LLM service entry point: local-model generation through Ollama."""
 
 from fastapi import FastAPI
 
@@ -9,7 +9,7 @@ def create_llm_app() -> FastAPI:
     app = FastAPI(
         title="TechAssist LLM Service",
         version="0.4.0",
-        description="Generates technical-support responses with Code Llama through Ollama.",
+        description="Generates technical-support responses with a configured Ollama model.",
     )
     app.include_router(llm_router)
 

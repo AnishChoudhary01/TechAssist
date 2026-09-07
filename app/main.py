@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.support import router as support_router
+from app.api.v1.uploads import router as uploads_router
 
 
 def create_app() -> FastAPI:
@@ -14,10 +15,11 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="TechAssist – AI Technical Support Assistant",
         version="1.0.0",
-        description="A transparent technical-support assistant with RAG, Ollama, and Code Llama.",
+        description="A transparent technical-support assistant with RAG, Ollama, and a lightweight local LLM.",
     )
 
     app.include_router(support_router, prefix="/api/v1")
+    app.include_router(uploads_router, prefix="/api/v1")
     web_directory = Path(__file__).parent / "web"
     app.mount("/static", StaticFiles(directory=web_directory), name="static")
 

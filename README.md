@@ -1,18 +1,19 @@
 # TechAssist – AI Technical Support Assistant
 
-TechAssist is a technical-support assistant that uses Code Llama through Ollama.
+TechAssist is a technical-support assistant that uses the fast, lightweight
+`qwen2.5-coder:0.5b-instruct` model through Ollama by default.
 It ingests technical manuals, troubleshooting guides, FAQs, error-code documents,
 and installation/configuration guides, retrieves relevant excerpts with RAG, then
 uses them to ground its troubleshooting response.
 
 The public API service also hosts a single browser UI at `http://127.0.0.1:8000/`.
 It displays the complete answer flow—question, API orchestration, RAG retrieval,
-retrieved chunks/context, Ollama/Code Llama generation, and the final answer—in
+retrieved chunks/context, Ollama/LLM generation, and the final answer—in
 one interface.
 
 All five exercises are implemented:
 
-1. FastAPI application with Ollama + Code Llama generation.
+1. FastAPI application with Ollama + a lightweight local LLM generation.
 2. Document loading, overlap chunking, Ollama embeddings, and persistent ChromaDB.
 3. RAG query embedding, vector similarity search, context retrieval, and grounded generation.
 4. Separate API/Application, RAG, and LLM services coordinated by an orchestrator.
@@ -22,7 +23,7 @@ All five exercises are implemented:
 
 ```text
 Client -> API/Application :8000 -> orchestrator -> RAG service :8001 -> ChromaDB + Ollama embeddings
-                                              -> LLM service :8002 -> Ollama Code Llama
+                                              -> LLM service :8002 -> Ollama Qwen2.5-Coder 0.5B
 ```
 
 The API service is the public entry point. It first retrieves relevant indexed
@@ -33,7 +34,7 @@ then calls the LLM service. The RAG and LLM services can scale independently.
 
 - Python 3.11 or newer
 - [Ollama](https://ollama.com/) running locally
-- The Code Llama and embedding models pulled into Ollama
+- The Qwen2.5-Coder 0.5B and embedding models pulled into Ollama
 
 ## Setup
 
@@ -41,7 +42,7 @@ then calls the LLM service. The RAG and LLM services can scale independently.
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-ollama pull codellama:7b
+ollama pull qwen2.5-coder:0.5b-instruct
 ollama pull nomic-embed-text
 ```
 
@@ -49,7 +50,7 @@ Optional environment variables (shown in `.env.example`):
 
 ```powershell
 $env:OLLAMA_BASE_URL = "http://127.0.0.1:11434"
-$env:OLLAMA_MODEL = "codellama:7b"
+$env:OLLAMA_MODEL = "qwen2.5-coder:0.5b-instruct"
 $env:OLLAMA_TIMEOUT_SECONDS = "300"
 $env:OLLAMA_NUM_PREDICT = "256"
 $env:OLLAMA_EMBEDDING_MODEL = "nomic-embed-text"
@@ -90,9 +91,11 @@ updates it rather than inserting an additional copy.
 
 ## Use the public API
 
-Open the TechAssist UI at `http://127.0.0.1:8000/`. It is the recommended way to
-ask questions and inspect the end-to-end processing trace. The interactive API
-documentation remains available at `http://127.0.0.1:8000/docs`, or call:
+Open the TechAssist UI at `http://127.0.0.1:8000/`. Use its Knowledge base panel
+to upload a `.txt`, `.md`, or text-based `.pdf` directly; it is chunked, embedded,
+and added to ChromaDB immediately. The same UI lets you ask questions and inspect
+the end-to-end processing trace. The interactive API documentation remains
+available at `http://127.0.0.1:8000/docs`, or call:
 
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/support/ask" `
@@ -105,7 +108,7 @@ Example response:
 ```json
 {
   "answer": "...",
-  "model": "codellama:7b",
+  "model": "qwen2.5-coder:0.5b-instruct",
   "sources": [
     {"content": "...", "source": "guide.pdf", "page": 4}
   ]
@@ -123,7 +126,7 @@ Docker Desktop is required. Place documents in `data/knowledge_base/` first, the
 docker compose up --build
 ```
 
-The `ollama-init` service downloads `codellama:7b` and `nomic-embed-text` on its
+The `ollama-init` service downloads `qwen2.5-coder:0.5b-instruct` and `nomic-embed-text` on its
 first run. This can take several minutes. Once it completes, index your mounted
 documents through `http://127.0.0.1:8001/v1/knowledge/index-directory`, then use
 the public API at `http://127.0.0.1:8000/docs`.

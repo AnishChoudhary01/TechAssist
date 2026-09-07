@@ -25,7 +25,7 @@ def test_llm_client_reports_the_internal_service_error(monkeypatch) -> None:
     monkeypatch.setattr(httpx, "AsyncClient", FailingClient)
     settings = Settings(
         ollama_base_url="http://ollama",
-        ollama_model="codellama:7b",
+        ollama_model="qwen2.5-coder:0.5b-instruct",
         ollama_timeout_seconds=300,
         ollama_num_predict=256,
         ollama_embedding_model="nomic-embed-text",
