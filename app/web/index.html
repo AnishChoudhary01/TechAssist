@@ -41,7 +41,7 @@
 
           <article class="workflow-card ask-card" aria-labelledby="ask-heading">
             <div class="step-marker">2</div>
-            <div class="card-head"><div><h2 id="ask-heading">Ask</h2><p id="ask-guidance">Ask a technical question based on your indexed documents.</p></div><button id="submit-button" class="button" form="question-form" type="submit">Analyze issue <span>›</span></button></div>
+            <div class="card-head"><div><h2 id="ask-heading">Ask</h2><p id="ask-guidance">Ask a technical question based on your indexed documents.</p></div><div class="ask-actions"><label class="model-picker" for="model-select"><span>Model</span><select id="model-select" name="model" form="question-form" aria-label="Local language model"><option value="qwen2.5-coder:0.5b-instruct">Qwen2.5-Coder 0.5B</option></select></label><button id="submit-button" class="button" form="question-form" type="submit">Analyze issue <span>›</span></button></div></div>
             <form id="question-form"><label class="sr-only" for="question">Technical support question</label><textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="Type your technical support question here..."></textarea><div class="question-footer"><span id="question-count">0 / 4000</span><span id="request-status" class="request-status" aria-live="polite">Ready</span></div></form>
             <p id="error-message" class="notice notice-error" role="alert" hidden></p>
           </article>

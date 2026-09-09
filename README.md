@@ -1,7 +1,8 @@
 # TechAssist – AI Technical Support Assistant
 
 TechAssist is a technical-support assistant that uses the fast, lightweight
-`qwen2.5-coder:0.5b-instruct` model through Ollama by default.
+`qwen2.5-coder:0.5b-instruct` model through Ollama by default. Its UI can also
+switch between configured compact local models.
 It ingests technical manuals, troubleshooting guides, FAQs, error-code documents,
 and installation/configuration guides, retrieves relevant excerpts with RAG, then
 uses them to ground its troubleshooting response.
@@ -43,6 +44,8 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ollama pull qwen2.5-coder:0.5b-instruct
+ollama pull qwen2.5:0.5b
+ollama pull smollm2:360m
 ollama pull nomic-embed-text
 ```
 
@@ -51,6 +54,7 @@ Optional environment variables (shown in `.env.example`):
 ```powershell
 $env:OLLAMA_BASE_URL = "http://127.0.0.1:11434"
 $env:OLLAMA_MODEL = "qwen2.5-coder:0.5b-instruct"
+$env:OLLAMA_MODELS = "qwen2.5-coder:0.5b-instruct,qwen2.5:0.5b,smollm2:360m"
 $env:OLLAMA_TIMEOUT_SECONDS = "300"
 $env:OLLAMA_NUM_PREDICT = "256"
 $env:OLLAMA_EMBEDDING_MODEL = "nomic-embed-text"
@@ -126,7 +130,7 @@ Docker Desktop is required. Place documents in `data/knowledge_base/` first, the
 docker compose up --build
 ```
 
-The `ollama-init` service downloads `qwen2.5-coder:0.5b-instruct` and `nomic-embed-text` on its
+The `ollama-init` service downloads the configured compact models and `nomic-embed-text` on its
 first run. This can take several minutes. Once it completes, index your mounted
 documents through `http://127.0.0.1:8001/v1/knowledge/index-directory`, then use
 the public API at `http://127.0.0.1:8000/docs`.
@@ -139,3 +143,17 @@ and Ollama models persist in named Docker volumes.
 ```powershell
 .\.venv\Scripts\python -m pytest -q
 ```
+
+## Evaluate compact local models
+
+The evaluation harness compares Qwen2.5-Coder 0.5B, Qwen2.5 0.5B, and SmolLM2
+360M with the same questions, retrieved RAG context, production prompt, and
+generation settings. Start Ollama and the RAG service, then run:
+
+```powershell
+.\.venv\Scripts\python .\evaluation\evaluate_models.py `
+  --output .\evaluation\results\model_comparison.json
+```
+
+See `evaluation/MODEL_COMPARISON.md` for the scoring rubric and controlled
+conditions.

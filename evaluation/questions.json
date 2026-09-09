@@ -1,0 +1,18 @@
+[
+  {
+    "id": "battery-low",
+    "question": "What should I do when my Acer laptop shows a battery-low warning?"
+  },
+  {
+    "id": "supervisor-password",
+    "question": "How do I set a Supervisor Password in the Acer BIOS utility?"
+  },
+  {
+    "id": "windows-recovery",
+    "question": "My Acer computer will not start Windows. What recovery steps does the manual recommend?"
+  },
+  {
+    "id": "wireless-connection",
+    "question": "How do I connect my Acer computer to a wireless network?"
+  }
+]

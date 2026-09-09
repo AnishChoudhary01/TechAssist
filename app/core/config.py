@@ -11,6 +11,7 @@ class Settings:
 
     ollama_base_url: str
     ollama_model: str
+    ollama_models: tuple[str, ...]
     ollama_timeout_seconds: float
     ollama_num_predict: int
     ollama_embedding_model: str
@@ -27,10 +28,23 @@ class Settings:
 @lru_cache
 def get_settings() -> Settings:
     """Load settings from environment variables with local-development defaults."""
+    default_model = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:0.5b-instruct")
+    configured_models = tuple(
+        model.strip()
+        for model in os.getenv(
+            "OLLAMA_MODELS",
+            "qwen2.5-coder:0.5b-instruct,qwen2.5:0.5b,smollm2:360m",
+        ).split(",")
+        if model.strip()
+    )
+    # Keep the configured default selectable even when a custom list omits it.
+    model_options = configured_models if default_model in configured_models else (default_model, *configured_models)
+
     return Settings(
         # Explicit IPv4 loopback avoids localhost/IPv6 resolution mismatches on Windows.
         ollama_base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/"),
-        ollama_model=os.getenv("OLLAMA_MODEL", "qwen2.5-coder:0.5b-instruct"),
+        ollama_model=default_model,
+        ollama_models=model_options,
         # A cold local model request can take several minutes on CPU-only machines.
         ollama_timeout_seconds=float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "300")),
         ollama_num_predict=int(os.getenv("OLLAMA_NUM_PREDICT", "256")),

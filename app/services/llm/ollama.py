@@ -58,10 +58,11 @@ class OllamaCodeLlamaClient:
         self._timeout_seconds = settings.ollama_timeout_seconds
         self._num_predict = settings.ollama_num_predict
 
-    async def generate(self, prompt: str, system_prompt: str) -> tuple[str, str]:
+    async def generate(self, prompt: str, system_prompt: str, model: str | None = None) -> tuple[str, str]:
         """Request a troubleshooting answer from the configured Ollama model."""
+        selected_model = model or self._model
         payload = {
-            "model": self._model,
+            "model": selected_model,
             "prompt": prompt,
             "system": system_prompt,
             "stream": False,
@@ -83,7 +84,7 @@ class OllamaCodeLlamaClient:
         try:
             data = response.json()
             answer = data["response"].strip()
-            model = data.get("model", self._model)
+            model = data.get("model", selected_model)
         except (KeyError, TypeError, ValueError) as error:
             raise OllamaResponseError from error
 

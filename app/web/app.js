@@ -1,6 +1,97 @@
-const form=document.querySelector("#question-form"),questionInput=document.querySelector("#question"),questionCount=document.querySelector("#question-count"),submitButton=document.querySelector("#submit-button"),requestStatus=document.querySelector("#request-status"),errorMessage=document.querySelector("#error-message"),resultPanel=document.querySelector("#answer-card"),answer=document.querySelector("#answer"),sources=document.querySelector("#sources"),contextSummary=document.querySelector("#context-summary"),llmInfo=document.querySelector("#llm-info"),responseMeta=document.querySelector("#response-meta"),flowSummary=document.querySelector("#flow-summary"),flowItems=[...document.querySelectorAll("#flow li")],uploadForm=document.querySelector("#upload-form"),fileInput=document.querySelector("#document-file"),fileLabel=document.querySelector("#file-label"),uploadButton=document.querySelector("#upload-button"),uploadStatus=document.querySelector("#upload-status"),dropZone=document.querySelector("#drop-zone"),knowledgeState=document.querySelector("#knowledge-state"),askGuidance=document.querySelector("#ask-guidance"),documentCount=document.querySelector("#document-count"),indexedDocuments=document.querySelector("#indexed-documents");let uploadedCount=0,knowledgeReady=false;
-function element(t,x,c=""){const n=document.createElement(t);n.textContent=x;if(c)n.className=c;return n}function setRequestStatus(t,c=""){requestStatus.textContent=t;requestStatus.className=`request-status ${c}`}function setUploadStatus(t,c=""){uploadStatus.textContent=t;uploadStatus.className=`notice ${c?`notice-${c}`:""}`;uploadStatus.hidden=!t}function addDocument(r){if(!uploadedCount)indexedDocuments.replaceChildren();uploadedCount+=1;documentCount.textContent=`(${uploadedCount})`;const item=document.createElement("div");item.className="document-item";const details=document.createElement("div");details.append(element("strong",r.source),element("small",`${r.chunks_indexed} indexed chunk${r.chunks_indexed===1?"":"s"}`));item.append(element("span","▣","file-icon"),details,element("span","Indexed","indexed"));indexedDocuments.append(item);knowledgeReady=true;knowledgeState.textContent="Ready";knowledgeState.className="index-state";askGuidance.textContent=`${r.source} is indexed. Ask a question to retrieve relevant context.`}function resetFlow(){flowItems.forEach(i=>{i.classList.remove("active","complete");const n=i.querySelector("small");if(!n.dataset.default)n.dataset.default=n.textContent;n.textContent=n.dataset.default})}function updateFlow(t,p=false){const m=new Map(t.map(s=>[s.stage,s]));flowItems.forEach((i,n)=>{const s=m.get(i.dataset.stage),note=i.querySelector("small");i.classList.remove("active","complete");if(s){i.classList.add("complete");note.textContent=`${s.detail}${s.duration_ms==null?"":` · ${s.duration_ms} ms`}`}else if(p&&n===0){i.classList.add("active");note.textContent="Processing..."}})}
-function renderSources(a){sources.replaceChildren();if(!a.length){contextSummary.textContent="No source chunks matched this question.";return}contextSummary.textContent=`${a.length} relevant chunk(s) retrieved`;a.forEach((s,i)=>{const d=document.createElement("details");d.open=i===0;const meta=[s.category,s.distance!=null?`distance ${s.distance.toFixed(3)}`:""].filter(Boolean).join(" · ");d.append(element("summary",`${s.source}${s.page?` · page ${s.page}`:""}`),element("p",meta,"source-meta"),element("p",s.content,"source-content"));sources.append(d)})}function renderLlmInfo(d){const g=d.processing_trace.find(s=>s.stage==="Ollama / LLM generation"),r=d.processing_trace.find(s=>s.stage==="Knowledge base / RAG retrieval"),t=d.processing_trace.find(s=>s.stage==="Final response returned");llmInfo.replaceChildren();[["Model",d.model],["Generation",g?.duration_ms!=null?`${g.duration_ms} ms`:"—"],["Retrieval",r?.duration_ms!=null?`${r.duration_ms} ms`:"—"],["Total",t?.duration_ms!=null?`${t.duration_ms} ms`:"—"]].forEach(([l,v])=>{const row=document.createElement("div");row.append(element("dt",l),element("dd",v));llmInfo.append(row)});responseMeta.replaceChildren();[d.model,`${d.sources.length} source${d.sources.length===1?"":"s"}`].forEach(v=>responseMeta.append(element("span",v)))}
-questionInput.addEventListener("input",()=>{questionCount.textContent=`${questionInput.value.length} / 4000`});fileInput.addEventListener("change",()=>{fileLabel.textContent=fileInput.files[0]?.name||"Drag & drop files here"});["dragenter","dragover"].forEach(n=>dropZone.addEventListener(n,e=>{e.preventDefault();dropZone.classList.add("dragover")}));["dragleave","drop"].forEach(n=>dropZone.addEventListener(n,e=>{e.preventDefault();dropZone.classList.remove("dragover")}));dropZone.addEventListener("drop",e=>{if(e.dataTransfer.files.length){fileInput.files=e.dataTransfer.files;fileLabel.textContent=fileInput.files[0].name}});
-uploadForm.addEventListener("submit",async e=>{e.preventDefault();if(!fileInput.files[0])return;uploadButton.disabled=true;setUploadStatus("Indexing document…");try{const r=await fetch("/api/v1/knowledge/documents",{method:"POST",body:new FormData(uploadForm)}),d=await r.json();if(!r.ok)throw new Error(d.detail||"Document upload failed.");addDocument(d);setUploadStatus(`${d.source} added to the knowledge base.`,"success");uploadForm.reset();fileLabel.textContent="Drag & drop files here"}catch(e){setUploadStatus(e.message,"error")}finally{uploadButton.disabled=false}});
-form.addEventListener("submit",async e=>{e.preventDefault();const q=questionInput.value.trim();if(q.length<3)return;errorMessage.hidden=true;if(!knowledgeReady)askGuidance.textContent="No document has been uploaded in this session. The answer will use general troubleshooting guidance.";resultPanel.classList.add("is-empty");submitButton.disabled=true;resetFlow();updateFlow([],true);setRequestStatus("Analyzing","working");flowSummary.textContent="Retrieving context and generating a grounded answer.";try{const r=await fetch("/api/v1/support/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:q})}),d=await r.json();if(!r.ok)throw new Error(d.detail||"The request could not be completed.");answer.textContent=d.answer;renderSources(d.sources);renderLlmInfo(d);updateFlow(d.processing_trace);resultPanel.classList.remove("is-empty");setRequestStatus("Complete","complete");flowSummary.textContent="Completed stages include backend timing and source provenance.";resultPanel.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){setRequestStatus("Unavailable","failed");errorMessage.textContent=e.message;errorMessage.hidden=false;flowSummary.textContent="The request stopped before a response was available."}finally{submitButton.disabled=false}});
+const form = document.querySelector("#question-form");
+const questionInput = document.querySelector("#question");
+const questionCount = document.querySelector("#question-count");
+const submitButton = document.querySelector("#submit-button");
+const modelSelect = document.querySelector("#model-select");
+const requestStatus = document.querySelector("#request-status");
+const errorMessage = document.querySelector("#error-message");
+const resultPanel = document.querySelector("#answer-card");
+const answer = document.querySelector("#answer");
+const sources = document.querySelector("#sources");
+const contextSummary = document.querySelector("#context-summary");
+const llmInfo = document.querySelector("#llm-info");
+const responseMeta = document.querySelector("#response-meta");
+const flowSummary = document.querySelector("#flow-summary");
+const flowItems = [...document.querySelectorAll("#flow li")];
+const uploadForm = document.querySelector("#upload-form");
+const fileInput = document.querySelector("#document-file");
+const fileLabel = document.querySelector("#file-label");
+const uploadButton = document.querySelector("#upload-button");
+const uploadStatus = document.querySelector("#upload-status");
+const dropZone = document.querySelector("#drop-zone");
+const knowledgeState = document.querySelector("#knowledge-state");
+const askGuidance = document.querySelector("#ask-guidance");
+const documentCount = document.querySelector("#document-count");
+const indexedDocuments = document.querySelector("#indexed-documents");
+let uploadedCount = 0;
+let knowledgeReady = false;
+
+function element(tag, text, className = "") { const node = document.createElement(tag); node.textContent = text; if (className) node.className = className; return node; }
+function setRequestStatus(text, className = "") { requestStatus.textContent = text; requestStatus.className = `request-status ${className}`; }
+function setUploadStatus(text, className = "") { uploadStatus.textContent = text; uploadStatus.className = `notice ${className ? `notice-${className}` : ""}`; uploadStatus.hidden = !text; }
+
+function addDocument(result) {
+  if (!uploadedCount) indexedDocuments.replaceChildren();
+  uploadedCount += 1; documentCount.textContent = `(${uploadedCount})`;
+  const item = document.createElement("div"); item.className = "document-item";
+  const details = document.createElement("div");
+  details.append(element("strong", result.source), element("small", `${result.chunks_indexed} indexed chunk${result.chunks_indexed === 1 ? "" : "s"}`));
+  item.append(element("span", "▣", "file-icon"), details, element("span", "Indexed", "indexed"));
+  indexedDocuments.append(item); knowledgeReady = true; knowledgeState.textContent = "Ready"; knowledgeState.className = "index-state";
+  askGuidance.textContent = `${result.source} is indexed. Ask a question to retrieve relevant context.`;
+}
+
+function resetFlow() { flowItems.forEach((item) => { item.classList.remove("active", "complete"); const note = item.querySelector("small"); if (!note.dataset.default) note.dataset.default = note.textContent; note.textContent = note.dataset.default; }); }
+function updateFlow(trace, pending = false) {
+  const steps = new Map(trace.map((step) => [step.stage, step]));
+  flowItems.forEach((item, index) => { const step = steps.get(item.dataset.stage); const note = item.querySelector("small"); item.classList.remove("active", "complete"); if (step) { item.classList.add("complete"); note.textContent = `${step.detail}${step.duration_ms == null ? "" : ` · ${step.duration_ms} ms`}`; } else if (pending && index === 0) { item.classList.add("active"); note.textContent = "Processing..."; } });
+}
+
+function renderSources(items) {
+  sources.replaceChildren();
+  if (!items.length) { contextSummary.textContent = "No source chunks matched this question."; return; }
+  contextSummary.textContent = `${items.length} relevant chunk(s) retrieved`;
+  items.forEach((source, index) => { const detail = document.createElement("details"); detail.open = index === 0; const meta = [source.category, source.distance != null ? `distance ${source.distance.toFixed(3)}` : ""].filter(Boolean).join(" · "); detail.append(element("summary", `${source.source}${source.page ? ` · page ${source.page}` : ""}`), element("p", meta, "source-meta"), element("p", source.content, "source-content")); sources.append(detail); });
+}
+
+function renderLlmInfo(data) {
+  const generation = data.processing_trace.find((step) => step.stage === "Ollama / LLM generation");
+  const retrieval = data.processing_trace.find((step) => step.stage === "Knowledge base / RAG retrieval");
+  const total = data.processing_trace.find((step) => step.stage === "Final response returned");
+  llmInfo.replaceChildren();
+  [["Model", data.model], ["Generation", generation?.duration_ms != null ? `${generation.duration_ms} ms` : "—"], ["Retrieval", retrieval?.duration_ms != null ? `${retrieval.duration_ms} ms` : "—"], ["Total", total?.duration_ms != null ? `${total.duration_ms} ms` : "—"]].forEach(([label, value]) => { const row = document.createElement("div"); row.append(element("dt", label), element("dd", value)); llmInfo.append(row); });
+  responseMeta.replaceChildren(); [data.model, `${data.sources.length} source${data.sources.length === 1 ? "" : "s"}`].forEach((value) => responseMeta.append(element("span", value)));
+}
+
+async function loadModelOptions() {
+  try {
+    const response = await fetch("/api/v1/support/models"); const data = await response.json();
+    if (!response.ok || !Array.isArray(data.models)) return;
+    modelSelect.replaceChildren();
+    data.models.forEach((model) => { const option = document.createElement("option"); option.value = model; option.textContent = model.replace(":", " · "); option.selected = model === data.default_model; modelSelect.append(option); });
+  } catch { /* The default compact model remains selectable when the API is unreachable. */ }
+}
+
+questionInput.addEventListener("input", () => { questionCount.textContent = `${questionInput.value.length} / 4000`; });
+fileInput.addEventListener("change", () => { fileLabel.textContent = fileInput.files[0]?.name || "Drag & drop files here"; });
+["dragenter", "dragover"].forEach((name) => dropZone.addEventListener(name, (event) => { event.preventDefault(); dropZone.classList.add("dragover"); }));
+["dragleave", "drop"].forEach((name) => dropZone.addEventListener(name, (event) => { event.preventDefault(); dropZone.classList.remove("dragover"); }));
+dropZone.addEventListener("drop", (event) => { if (event.dataTransfer.files.length) { fileInput.files = event.dataTransfer.files; fileLabel.textContent = event.dataTransfer.files[0].name; } });
+
+uploadForm.addEventListener("submit", async (event) => {
+  event.preventDefault(); if (!fileInput.files[0]) return; uploadButton.disabled = true; setUploadStatus("Indexing document…");
+  try { const response = await fetch("/api/v1/knowledge/documents", { method: "POST", body: new FormData(uploadForm) }); const data = await response.json(); if (!response.ok) throw new Error(data.detail || "Document upload failed."); addDocument(data); setUploadStatus(`${data.source} added to the knowledge base.`, "success"); uploadForm.reset(); fileLabel.textContent = "Drag & drop files here"; } catch (error) { setUploadStatus(error.message, "error"); } finally { uploadButton.disabled = false; }
+});
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault(); const question = questionInput.value.trim(); if (question.length < 3) return;
+  errorMessage.hidden = true; if (!knowledgeReady) askGuidance.textContent = "No document has been uploaded in this session. The answer will use general troubleshooting guidance.";
+  resultPanel.classList.add("is-empty"); submitButton.disabled = true; modelSelect.disabled = true; resetFlow(); updateFlow([], true); setRequestStatus("Analyzing", "working"); flowSummary.textContent = "Retrieving context and generating a grounded answer.";
+  try {
+    const response = await fetch("/api/v1/support/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question, model: modelSelect.value }) }); const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "The request could not be completed.");
+    answer.textContent = data.answer; renderSources(data.sources); renderLlmInfo(data); updateFlow(data.processing_trace); resultPanel.classList.remove("is-empty"); setRequestStatus("Complete", "complete"); flowSummary.textContent = "Completed stages include backend timing and source provenance."; resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) { setRequestStatus("Unavailable", "failed"); errorMessage.textContent = error.message; errorMessage.hidden = false; flowSummary.textContent = "The request stopped before a response was available."; } finally { submitButton.disabled = false; modelSelect.disabled = false; }
+});
+
+loadModelOptions();

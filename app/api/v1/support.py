@@ -5,7 +5,7 @@ from time import perf_counter
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import Settings, get_settings
-from app.models.support import ProcessingStep, SupportQuestion, SupportResponse
+from app.models.support import ModelOptionsResponse, ProcessingStep, SupportQuestion, SupportResponse
 from app.services.orchestrator import (
     LLMServiceClient,
     RAGServiceClient,
@@ -24,15 +24,24 @@ def get_support_service(settings: Settings = Depends(get_settings)) -> Technical
     )
 
 
+@router.get("/models", response_model=ModelOptionsResponse)
+async def available_models(settings: Settings = Depends(get_settings)) -> ModelOptionsResponse:
+    """Return the compact local models allowed for interactive selection."""
+    return ModelOptionsResponse(default_model=settings.ollama_model, models=list(settings.ollama_models))
+
+
 @router.post("/ask", response_model=SupportResponse, status_code=status.HTTP_200_OK)
 async def ask_support_question(
     question: SupportQuestion,
     service: TechnicalSupportOrchestrator = Depends(get_support_service),
+    settings: Settings = Depends(get_settings),
 ) -> SupportResponse:
     """Generate troubleshooting guidance for a user's technical-support question."""
+    if question.model and question.model not in settings.ollama_models:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="The selected model is not available.")
     started = perf_counter()
     try:
-        answer, model, sources, trace = await service.answer(question.question)
+        answer, model, sources, trace = await service.answer(question.question, question.model)
     except UpstreamServiceError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

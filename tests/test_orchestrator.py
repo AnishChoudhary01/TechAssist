@@ -11,11 +11,11 @@ class StubRetriever:
 
 
 class StubGenerator:
-    async def generate(self, prompt: str, system_prompt: str) -> tuple[str, str]:
+    async def generate(self, prompt: str, system_prompt: str, model: str | None = None) -> tuple[str, str]:
         assert "Verify the configuration file." in prompt
         assert "Why does setup fail?" in prompt
         assert "TechAssist" in system_prompt
-        return "Check the configuration file.", "qwen2.5-coder:0.5b-instruct"
+        return "Check the configuration file.", model or "qwen2.5-coder:0.5b-instruct"
 
 
 def test_orchestrator_retrieves_context_before_generation() -> None:

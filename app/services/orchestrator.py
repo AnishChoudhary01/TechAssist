@@ -32,7 +32,7 @@ class ContextRetriever(Protocol):
 
 
 class ResponseGenerator(Protocol):
-    async def generate(self, prompt: str, system_prompt: str) -> tuple[str, str]: ...
+    async def generate(self, prompt: str, system_prompt: str, model: str | None = None) -> tuple[str, str]: ...
 
 
 class RAGServiceClient:
@@ -98,12 +98,12 @@ class LLMServiceClient:
         self._base_url = settings.llm_service_url
         self._timeout = settings.ollama_timeout_seconds
 
-    async def generate(self, prompt: str, system_prompt: str) -> tuple[str, str]:
+    async def generate(self, prompt: str, system_prompt: str, model: str | None = None) -> tuple[str, str]:
         try:
             async with httpx.AsyncClient(timeout=self._timeout, trust_env=False) as client:
                 response = await client.post(
                     f"{self._base_url}/v1/generate",
-                    json={"prompt": prompt, "system_prompt": system_prompt},
+                    json={"prompt": prompt, "system_prompt": system_prompt, "model": model},
                 )
                 response.raise_for_status()
             parsed = GenerationResponse.model_validate(response.json())
@@ -135,7 +135,7 @@ class TechnicalSupportOrchestrator:
         self._retriever = retriever
         self._generator = generator
 
-    async def answer(self, question: str) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep]]:
+    async def answer(self, question: str, model: str | None = None) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep]]:
         """Retrieve context, generate an answer, and record the processing trace."""
         retrieval_started = perf_counter()
         sources = await self._retriever.retrieve(question)
@@ -147,7 +147,7 @@ class TechnicalSupportOrchestrator:
             "Provide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next."
         )
         generation_started = perf_counter()
-        answer, model = await self._generator.generate(prompt, SYSTEM_PROMPT)
+        answer, model = await self._generator.generate(prompt, SYSTEM_PROMPT, model)
         generation_duration = int((perf_counter() - generation_started) * 1000)
         source_labels = sorted({source.source for source in sources})
         trace = [

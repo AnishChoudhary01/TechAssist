@@ -1,0 +1,271 @@
+{
+  "generated_at_utc": "2026-09-09T11:43:59.972299+00:00",
+  "application": "TechAssist Week 3 RAG technical-support assistant",
+  "models": [
+    "qwen2.5-coder:0.5b-instruct",
+    "qwen2.5:0.5b",
+    "smollm2:360m"
+  ],
+  "evaluation_conditions": {
+    "knowledge_base": "Existing ChromaDB collection queried through the unchanged RAG service",
+    "retrieval": {
+      "top_k": 4,
+      "retrieved_once_per_question": true,
+      "shared_across_models": true
+    },
+    "prompt": "Production SYSTEM_PROMPT and production prompt template from app.services.orchestrator",
+    "generation": {
+      "temperature": 0.2,
+      "seed": 42,
+      "num_predict": 256,
+      "stream": false
+    },
+    "execution": "One sequential run per model/question on the same local Ollama server"
+  },
+  "results": [
+    {
+      "id": "battery-low",
+      "question": "What should I do when my Acer laptop shows a battery-low warning?",
+      "retrieved_context": [
+        {
+          "content": "Battery pack - 45 Checking the battery level The power meter indicates the current battery level. Rest the cursor over the battery/power icon on the taskbar to see the battery's present charge level. Battery-low warning When using battery power pay attention to the power meter. When the battery-low warning appears, the recommended course of action depends on your situation: Important Connect the AC adapter as soon as possible after the battery-low warning appears. Data may be lost if the battery is allowed to become fully depleted and the computer shuts down. Situation Recommended Action The AC adapter and a power outlet are available. 1. Plug the AC adapter into the computer, and then connect to the main power supply. 2. Save all necessary files. 3. Resume work. Turn off the computer if you want to recharge the battery rapidly. The AC adapter or a power outlet is unavailable. 1. Save all necessary files. 2. Close all applications. 3. Turn off the computer.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 50,
+          "distance": 0.3409321904182434
+        },
+        {
+          "content": "attery is fully charged. Battery performance is especially limited in temperatures well below freezing. Do not dispose of batteries in a fi re as they may explode. Batteries may also explode if damaged. Dispose of batteries according to local regulations. Please recycle when possible. Do not dispose as household waste. Wireless devices may be susceptible to interference from the battery, which could affect performance. Internal battery \u2022 Do not attempt to replace a built-in rechargeable battery, battery replacement must be done by an Acer- authorized repair facility. \u2022 Recharge the battery by following the instruction included in the product documentation. Note Please refer to www.acer.com for battery shipping documents.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 15,
+          "distance": 0.5356712341308594
+        },
+        {
+          "content": "8 - First things first Guidelines for safe battery usage Precautions when charging batteries The useful lifespan of a battery is adversely affected by the following behavior: \u2022 Constantly charging the battery/device when already at full capacity. \u2022 Charging the battery/device at temperatures above 35 \u00b0C (95 \u00b0F) or below 0 \u00b0C (32 \u00b0F). To prevent damage, follow these precautions: \u2022 Stop charging the battery once it reaches 100% capacity; regularly or frequently charging a fully charged battery for an extended period of time may cause battery deformation or damage. We recommend that you recharge the device when the battery level drops below 70% capacity. \u2022 Do not charge battery in temperatures above 35 \u00b0C (95 \u00b0F) or below 0 \u00b0C (32 \u00b0F). Charging in abnormally high or abnormally low temperatures can cause battery deformation or damage. \u2022 The charging port must be clean and free from debris and should only be used with Acer charging equipment. Use of a non-Acer battery or charging equipment",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 13,
+          "distance": 0.5521097183227539
+        },
+        {
+          "content": "Battery pack - 43 BATTERY PACK The computer uses an embedded Lithium battery that gives you long use between charges. Battery characteristics The battery is recharged whenever you connect the computer to the AC adapter. Your computer supports charge-in-use, enabling you to recharge the battery while you continue to operate the computer. However, recharging with the computer turned off significantly reduces charge time. The battery will come in handy when you travel or during a power failure. Charging the battery Plug the AC adapter into the computer, and connect to a mains power outlet. Conditioning a new battery pack Before you use a battery pack for the first time, there is a conditioning process that you should follow: 1.Connect the AC adapter and fully charge the battery. 2.Turn on the computer and complete setting up the operating system. 3.Disconnect the AC adapter. 4.Operate the computer using battery power. 5.Fully deplete the battery until the battery-low warning appears.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 48,
+          "distance": 0.5735155344009399
+        }
+      ],
+      "prompt": "Technical support question:\nWhat should I do when my Acer laptop shows a battery-low warning?\n\nKnowledge-base context:\n[Source: acer_manual.pdf, page 50]\nBattery pack - 45 Checking the battery level The power meter indicates the current battery level. Rest the cursor over the battery/power icon on the taskbar to see the battery's present charge level. Battery-low warning When using battery power pay attention to the power meter. When the battery-low warning appears, the recommended course of action depends on your situation: Important Connect the AC adapter as soon as possible after the battery-low warning appears. Data may be lost if the battery is allowed to become fully depleted and the computer shuts down. Situation Recommended Action The AC adapter and a power outlet are available. 1. Plug the AC adapter into the computer, and then connect to the main power supply. 2. Save all necessary files. 3. Resume work. Turn off the computer if you want to recharge the battery rapidly. The AC adapter or a power outlet is unavailable. 1. Save all necessary files. 2. Close all applications. 3. Turn off the computer.\n\n[Source: acer_manual.pdf, page 15]\nattery is fully charged. Battery performance is especially limited in temperatures well below freezing. Do not dispose of batteries in a fi re as they may explode. Batteries may also explode if damaged. Dispose of batteries according to local regulations. Please recycle when possible. Do not dispose as household waste. Wireless devices may be susceptible to interference from the battery, which could affect performance. Internal battery \u2022 Do not attempt to replace a built-in rechargeable battery, battery replacement must be done by an Acer- authorized repair facility. \u2022 Recharge the battery by following the instruction included in the product documentation. Note Please refer to www.acer.com for battery shipping documents.\n\n[Source: acer_manual.pdf, page 13]\n8 - First things first Guidelines for safe battery usage Precautions when charging batteries The useful lifespan of a battery is adversely affected by the following behavior: \u2022 Constantly charging the battery/device when already at full capacity. \u2022 Charging the battery/device at temperatures above 35 \u00b0C (95 \u00b0F) or below 0 \u00b0C (32 \u00b0F). To prevent damage, follow these precautions: \u2022 Stop charging the battery once it reaches 100% capacity; regularly or frequently charging a fully charged battery for an extended period of time may cause battery deformation or damage. We recommend that you recharge the device when the battery level drops below 70% capacity. \u2022 Do not charge battery in temperatures above 35 \u00b0C (95 \u00b0F) or below 0 \u00b0C (32 \u00b0F). Charging in abnormally high or abnormally low temperatures can cause battery deformation or damage. \u2022 The charging port must be clean and free from debris and should only be used with Acer charging equipment. Use of a non-Acer battery or charging equipment\n\n[Source: acer_manual.pdf, page 48]\nBattery pack - 43 BATTERY PACK The computer uses an embedded Lithium battery that gives you long use between charges. Battery characteristics The battery is recharged whenever you connect the computer to the AC adapter. Your computer supports charge-in-use, enabling you to recharge the battery while you continue to operate the computer. However, recharging with the computer turned off significantly reduces charge time. The battery will come in handy when you travel or during a power failure. Charging the battery Plug the AC adapter into the computer, and connect to a mains power outlet. Conditioning a new battery pack Before you use a battery pack for the first time, there is a conditioning process that you should follow: 1.Connect the AC adapter and fully charge the battery. 2.Turn on the computer and complete setting up the operating system. 3.Disconnect the AC adapter. 4.Operate the computer using battery power. 5.Fully deplete the battery until the battery-low warning appears.\n\nProvide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next.",
+      "answers": {
+        "qwen2.5-coder:0.5b-instruct": {
+          "answer": "When your Acer laptop shows a battery-low warning, it's important to follow these steps to ensure your laptop is properly charged and functioning:\n\n1. **Check the Battery Level**: The power meter should show the current battery level. If it's low, the recommended course of action is to:\n   - **Plug the AC adapter into the computer** and connect to the main power supply.\n   - **Save all necessary files**.\n   - **Resume work**.\n   - **Turn off the computer** if you want to recharge the battery rapidly.\n\n2. **Check for Overheating**: If the battery is overheating, it can cause damage. You should:\n   - **Stop charging the battery once it reaches 100% capacity**.\n   - **Regularly or frequently charging a fully charged battery for an extended period of time** may cause battery deformation or damage.\n   - **The charging port must be clean and free from debris and should only be used with Acer charging equipment.**\n   - **Use of a non-Acer battery or charging equipment** is not recommended.\n\n3. **Check for Damage**: If the battery is damaged, it can cause performance issues. You should:\n   - **Stop charging the battery once it reaches 70%",
+          "latency_ms": 27145,
+          "word_count": 186,
+          "reported_model": "qwen2.5-coder:0.5b-instruct",
+          "ollama_total_duration_ms": 27106,
+          "ollama_eval_count": 256
+        },
+        "qwen2.5:0.5b": {
+          "answer": "When your Acer laptop shows a battery-low warning, the first step is to check the battery level. If the battery is fully charged, the warning is not applicable. If the battery is not fully charged, the warning indicates that the battery is low in charge. The next step is to check the power meter to see the current battery level. If the battery level is low, the power meter will show a warning. If the battery level is high, the power meter will show a normal reading. If the power meter shows a warning, the recommended course of action depends on your situation. If the battery is fully charged, you can continue using the laptop. If the battery is not fully charged, you should charge the battery by following the instructions in the manual. If the battery is not fully charged, you should turn off the laptop and charge the battery. If the battery is not fully charged, you should turn off the laptop and charge the battery. If the battery is not fully charged, you should turn off the laptop and charge the battery. If the battery is not fully charged, you should turn off the laptop and charge the battery. If the battery is not fully charged, you should turn off the laptop and charge the battery. If the battery is not fully charged, you",
+          "latency_ms": 17294,
+          "word_count": 227,
+          "reported_model": "qwen2.5:0.5b",
+          "ollama_total_duration_ms": 17273,
+          "ollama_eval_count": 256
+        },
+        "smollm2:360m": {
+          "answer": "When your Acer laptop shows a battery-low warning, follow these steps to troubleshoot and resolve the issue:\n\n1. Check the battery level: Connect the AC adapter to the computer and check the battery level on the taskbar. If the battery is fully charged, it's likely that the battery pack is fully charged as well.\n\n2. Check the AC adapter: Ensure the AC adapter is properly connected to the computer and the power supply is functioning correctly.\n\n3. Check the power supply: Verify that the power supply is functioning correctly and that the AC adapter is properly connected.\n\n4. Check the computer: If the laptop is connected to a power outlet, check the computer's power settings to ensure that the AC adapter is not interfering with the computer's power supply.\n\n5. Check the battery pack: If the battery pack is fully charged, it may be the problem. If the battery pack is fully charged, it may be the problem.\n\n6. Recharge the battery: If the battery pack is fully charged, recharge the battery by following the instructions included in the product documentation.\n\n7. Disconnect the AC adapter: Once the battery pack is fully charged, disconnect the AC adapter from the computer and the power supply.\n\n8. Re",
+          "latency_ms": 29267,
+          "word_count": 206,
+          "reported_model": "smollm2:360m",
+          "ollama_total_duration_ms": 29251,
+          "ollama_eval_count": 256
+        }
+      }
+    },
+    {
+      "id": "supervisor-password",
+      "question": "How do I set a Supervisor Password in the Acer BIOS utility?",
+      "retrieved_context": [
+        {
+          "content": "er this password to gain access to the BIOS utility. See Setting passwords on page 40. \u2022 User Password secures your computer against unauthorized use. Combine the use of this password with password checkpoints on boot-up and resume from Hibernation (if available) for maximum security. \u2022 Password on Boot secures your computer against unauthorized use. Combine the use of this password with password checkpoints on boot-up and resume from Hibernation (if available) for maximum security. Important Do not forget your Supervisor Password! If you forget your password, please get in touch with your dealer or an authorized service center.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 43,
+          "distance": 0.4784858822822571
+        },
+        {
+          "content": "Securing your computer - 39 Entering passwords When a password is set, a password prompt appears in the center of the display screen. \u2022 When the Supervisor Password is set, a prompt appears when you enter the BIOS utility. \u2022 Type the Supervisor Password and press Enter to access the BIOS utility. If you enter the password incorrectly, a warning message appears. Try again and press Enter. \u2022 When the User Password is set and the password on boot parameter is enabled, a prompt appears at boot-up. \u2022 Type the User Password and press Enter to use the computer. If you enter the password incorrectly, a warning message appears. Try again and press Enter. Important You have three chances to enter a password. If you fail to enter the password correctly after three tries, the system halts. Press and hold the power button for four seconds to shut down the computer. Then turn on the computer again, and try again.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 44,
+          "distance": 0.5603670477867126
+        },
+        {
+          "content": "40 - BIOS utility BIOS UTILITY The BIOS utility is a hardware conf iguration program built into your computer's BIOS. Your computer is already properly configured and optimized, and you do not normally need to run this utility. However, if you encounter configuration problems, you may need to run it. To activate the BIOS utility, press F2 while the computer logo is being displayed. Boot sequence To set the boot sequence in the BIOS utility, activate the BIOS utility, then select Boot from the categories listed on the top of the screen. Setting passwords To set a password on boot, activate the BIOS utility, then select Security from the categories listed on the top of the screen. Find Set Supervisor Password and enter a password to enable this feature. Once you have entered a password for this feature, you may then enable/disable Password on Boot. Remember to select F10 to properly save and exit the BIOS utility when you are done making changes.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 45,
+          "distance": 0.5839486122131348
+        },
+        {
+          "content": "38 - Securing your computer SECURING YOUR COMPUTER Your computer is a valuable investment that you need to take care of. Learn how to protect and take care of your computer. Security features include hardware and software locks \u2014 a security notch and passwords. Using a computer security lock The computer comes with a computer security slot for a security lock. Wrap a computer security lock cable around an immovable object such as a table or handle of a locked drawer. Insert the lock into the notch and turn the key to secure the lock. Some keyless models are also available. Using passwords Passwords protect your computer from unauthorized access. Setting these passwords creates several different levels of protection for your computer and data: \u2022 Supervisor Password prevents unauthorized entry into the BIOS utility. Once set, you must enter this password to gain access to the BIOS utility. See Setting passwords on page 40. \u2022 User Password secures your computer against unauthorized use.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 43,
+          "distance": 0.7661714553833008
+        }
+      ],
+      "prompt": "Technical support question:\nHow do I set a Supervisor Password in the Acer BIOS utility?\n\nKnowledge-base context:\n[Source: acer_manual.pdf, page 43]\ner this password to gain access to the BIOS utility. See Setting passwords on page 40. \u2022 User Password secures your computer against unauthorized use. Combine the use of this password with password checkpoints on boot-up and resume from Hibernation (if available) for maximum security. \u2022 Password on Boot secures your computer against unauthorized use. Combine the use of this password with password checkpoints on boot-up and resume from Hibernation (if available) for maximum security. Important Do not forget your Supervisor Password! If you forget your password, please get in touch with your dealer or an authorized service center.\n\n[Source: acer_manual.pdf, page 44]\nSecuring your computer - 39 Entering passwords When a password is set, a password prompt appears in the center of the display screen. \u2022 When the Supervisor Password is set, a prompt appears when you enter the BIOS utility. \u2022 Type the Supervisor Password and press Enter to access the BIOS utility. If you enter the password incorrectly, a warning message appears. Try again and press Enter. \u2022 When the User Password is set and the password on boot parameter is enabled, a prompt appears at boot-up. \u2022 Type the User Password and press Enter to use the computer. If you enter the password incorrectly, a warning message appears. Try again and press Enter. Important You have three chances to enter a password. If you fail to enter the password correctly after three tries, the system halts. Press and hold the power button for four seconds to shut down the computer. Then turn on the computer again, and try again.\n\n[Source: acer_manual.pdf, page 45]\n40 - BIOS utility BIOS UTILITY The BIOS utility is a hardware conf iguration program built into your computer's BIOS. Your computer is already properly configured and optimized, and you do not normally need to run this utility. However, if you encounter configuration problems, you may need to run it. To activate the BIOS utility, press F2 while the computer logo is being displayed. Boot sequence To set the boot sequence in the BIOS utility, activate the BIOS utility, then select Boot from the categories listed on the top of the screen. Setting passwords To set a password on boot, activate the BIOS utility, then select Security from the categories listed on the top of the screen. Find Set Supervisor Password and enter a password to enable this feature. Once you have entered a password for this feature, you may then enable/disable Password on Boot. Remember to select F10 to properly save and exit the BIOS utility when you are done making changes.\n\n[Source: acer_manual.pdf, page 43]\n38 - Securing your computer SECURING YOUR COMPUTER Your computer is a valuable investment that you need to take care of. Learn how to protect and take care of your computer. Security features include hardware and software locks \u2014 a security notch and passwords. Using a computer security lock The computer comes with a computer security slot for a security lock. Wrap a computer security lock cable around an immovable object such as a table or handle of a locked drawer. Insert the lock into the notch and turn the key to secure the lock. Some keyless models are also available. Using passwords Passwords protect your computer from unauthorized access. Setting these passwords creates several different levels of protection for your computer and data: \u2022 Supervisor Password prevents unauthorized entry into the BIOS utility. Once set, you must enter this password to gain access to the BIOS utility. See Setting passwords on page 40. \u2022 User Password secures your computer against unauthorized use.\n\nProvide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next.",
+      "answers": {
+        "qwen2.5-coder:0.5b-instruct": {
+          "answer": "To set a Supervisor Password in the Acer BIOS utility, follow these steps:\n\n1. **Access the BIOS Utility**: Press F2 while the computer logo is being displayed. This will take you to the BIOS utility.\n\n2. **Navigate to Security**: In the BIOS utility, select \"Security\" from the categories listed on the top of the screen.\n\n3. **Set Supervisor Password**: On the next screen, you will see a prompt to enter a password. Type the Supervisor Password and press Enter.\n\n4. **Confirm Password**: Type the Supervisor Password again to confirm the password.\n\n5. **Access BIOS Utility Again**: If you enter the password incorrectly, a warning message will appear. Try again and press Enter.\n\n6. **Set User Password**: If you have enabled the User Password feature, you will be prompted to enter a password. Type the User Password and press Enter.\n\n7. **Confirm Password**: Type the User Password again to confirm the password.\n\n8. **Save and Exit**: If you are done making changes, press F10 to properly save and exit the BIOS utility.\n\n9. **Reboot the Computer**: After making changes, reboot the computer to apply the new passwords.\n\n10. **Verify Password**: After rebooting, verify that the Supervisor Password",
+          "latency_ms": 25125,
+          "word_count": 196,
+          "reported_model": "qwen2.5-coder:0.5b-instruct",
+          "ollama_total_duration_ms": 25076,
+          "ollama_eval_count": 256
+        },
+        "qwen2.5:0.5b": {
+          "answer": "To set a Supervisor Password in the Acer BIOS utility, follow these steps:\n\n1. Open the Acer BIOS utility by pressing F2 while the computer logo is being displayed.\n2. Select \"Security\" from the top categories.\n3. Find the \"Set Supervisor Password\" option and enter a password to enable this feature.\n4. Once you have entered a password for this feature, you may then enable/disable Password on Boot.\n5. Remember to select F10 to properly save and exit the BIOS utility when you are done making changes.\n\nIf you forget your Supervisor Password, you have three chances to enter it. If you fail to enter the password correctly after three tries, the system will halt. To shut down the computer, press and hold the power button for four seconds to shut down the computer. Then turn on the computer again, and try again.",
+          "latency_ms": 23472,
+          "word_count": 143,
+          "reported_model": "qwen2.5:0.5b",
+          "ollama_total_duration_ms": 23426,
+          "ollama_eval_count": 173
+        },
+        "smollm2:360m": {
+          "answer": "Technical support question:\nHow do I set a Supervisor Password in the Acer BIOS utility?\n\nKnowledge-base context:\n[Source: acer_manual.pdf, page 43]\n\n[Source: acer_manual.pdf, page 44]\n\n[Source: acer_manual.pdf, page 45]\n\n[Source: acer_manual.pdf, page 46]\n\n[Source: acer_manual.pdf, page 47]\n\n[Source: acer_manual.pdf, page 48]\n\n[Source: acer_manual.pdf, page 49]\n\n[Source: acer_manual.pdf, page 50]\n\n[Source: acer_manual.pdf, page 51]\n\n[Source: acer_manual.pdf, page 52]\n\n[Source: acer_manual.pdf, page 53]\n\n[Source: acer_manual.pdf, page 54]\n\n[Source: acer_manual.pdf, page 55]\n\n[Source: acer_manual",
+          "latency_ms": 32861,
+          "word_count": 71,
+          "reported_model": "smollm2:360m",
+          "ollama_total_duration_ms": 32818,
+          "ollama_eval_count": 256
+        }
+      }
+    },
+    {
+      "id": "windows-recovery",
+      "question": "My Acer computer will not start Windows. What recovery steps does the manual recommend?",
+      "retrieved_context": [
+        {
+          "content": "Recovery - 27 6.Choose your settings options and fo llow the instructions on screen. Click Confirm then Next to continue. 7.Resetting the PC will reinstall Windows, change settings back to their factory defaults and remove all preinstalled apps and programs without removing your personal files. Click Reset to continue. This will take a while and your PC will restart. 8.You will be shown the reset progress on the screen. The screen will turn off during the reset process. 9.The screen will turn back on when it is installing Windows. Your PC will restart several times during the reset process. 10.Follow the process until it completes. 11.When your PC has completed the reset process, Windows will have been reset back to its factory default settings without removing your personal files. Important If you have apps installed on your PC, they will be removed.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 32,
+          "distance": 0.6171108484268188
+        },
+        {
+          "content": "Frequently asked questions - 57 For more information, see Restoring your computer on page 25. Note To access the BIOS utility, press F2 when you see the Acer logo during boot up.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 62,
+          "distance": 0.6279428005218506
+        },
+        {
+          "content": "Recovery - 23 RECOVERY If you are having trouble with your computer, and the frequently asked questions (see Got a question? on page 54 ) do not help, you can recover your computer. This section describes the recovery tools available on your computer. Using recovery tools can help you reset or refresh your PC, back up files/data, or create a factory default backup. Creating a file history backup Windows backup allows you to quickly an d easily back up your files and restore them if the originals are lost, damaged or deleted. 1.Click on Settings in the Start menu, select Accounts, and then select Windows backup.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 28,
+          "distance": 0.6288491487503052
+        },
+        {
+          "content": "30 - Recovery 7.Click Reset to continue. 8.You will be shown the reset progress on the screen. The screen will turn off during the reset process. 9.The screen will turn back on when it is installing Windows. Your PC will restart several times during the reset process. 10.Follow the process until it completes. 11.When your PC has completed the reset process, Windows will use factory default settings.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 35,
+          "distance": 0.6346662044525146
+        }
+      ],
+      "prompt": "Technical support question:\nMy Acer computer will not start Windows. What recovery steps does the manual recommend?\n\nKnowledge-base context:\n[Source: acer_manual.pdf, page 32]\nRecovery - 27 6.Choose your settings options and fo llow the instructions on screen. Click Confirm then Next to continue. 7.Resetting the PC will reinstall Windows, change settings back to their factory defaults and remove all preinstalled apps and programs without removing your personal files. Click Reset to continue. This will take a while and your PC will restart. 8.You will be shown the reset progress on the screen. The screen will turn off during the reset process. 9.The screen will turn back on when it is installing Windows. Your PC will restart several times during the reset process. 10.Follow the process until it completes. 11.When your PC has completed the reset process, Windows will have been reset back to its factory default settings without removing your personal files. Important If you have apps installed on your PC, they will be removed.\n\n[Source: acer_manual.pdf, page 62]\nFrequently asked questions - 57 For more information, see Restoring your computer on page 25. Note To access the BIOS utility, press F2 when you see the Acer logo during boot up.\n\n[Source: acer_manual.pdf, page 28]\nRecovery - 23 RECOVERY If you are having trouble with your computer, and the frequently asked questions (see Got a question? on page 54 ) do not help, you can recover your computer. This section describes the recovery tools available on your computer. Using recovery tools can help you reset or refresh your PC, back up files/data, or create a factory default backup. Creating a file history backup Windows backup allows you to quickly an d easily back up your files and restore them if the originals are lost, damaged or deleted. 1.Click on Settings in the Start menu, select Accounts, and then select Windows backup.\n\n[Source: acer_manual.pdf, page 35]\n30 - Recovery 7.Click Reset to continue. 8.You will be shown the reset progress on the screen. The screen will turn off during the reset process. 9.The screen will turn back on when it is installing Windows. Your PC will restart several times during the reset process. 10.Follow the process until it completes. 11.When your PC has completed the reset process, Windows will use factory default settings.\n\nProvide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next.",
+      "answers": {
+        "qwen2.5-coder:0.5b-instruct": {
+          "answer": "The manual recommends the following recovery steps for your Acer computer:\n\n1. **Check for Corrupted System Files:**\n   - Open Command Prompt as an administrator.\n   - Type `chkdsk /f /r` and press Enter. This command checks for and repairs any corrupted system files.\n   - If the system files are corrupted, you may need to reinstall Windows.\n\n2. **Reinstall Windows:**\n   - If the system files are not corrupted, you can try reinstalling Windows.\n   - Download the Windows installation media from the Acer website.\n   - Follow the installation instructions carefully, ensuring to select the correct language and partitioning options.\n   - During the installation process, make sure to select the \"Custom\" installation option and choose the correct drive for installation.\n\n3. **Reset the PC:**\n   - If the above steps do not resolve the issue, you can try resetting the PC.\n   - Press F2 during boot up to enter the BIOS utility.\n   - Navigate to the \"Advanced\" tab and select \"Reset to factory default settings.\"\n   - Follow the prompts to complete the reset process.\n\n4. **Create a Factory Default Backup:**\n   - If the above steps do not resolve the issue, you can create a factory default backup.",
+          "latency_ms": 25131,
+          "word_count": 192,
+          "reported_model": "qwen2.5-coder:0.5b-instruct",
+          "ollama_total_duration_ms": 25037,
+          "ollama_eval_count": 256
+        },
+        "qwen2.5:0.5b": {
+          "answer": "To troubleshoot your Acer computer not starting Windows, follow these steps:\n\n1. Check the BIOS settings: The manual recommends resetting the PC to factory defaults and removing all personal files. If you have apps installed, they will be removed. To reset the PC, press F2 during boot-up when you see the Acer logo.\n\n2. Use the BIOS utility: The manual suggests using the BIOS utility to access the Windows backup. Click on Settings in the Start menu, select Accounts, and then select Windows backup.\n\n3. Use the recovery tools: The manual recommends using recovery tools to reset or refresh your PC, back up files/data, or create a factory default backup. To use recovery tools, press F2 during boot-up when you see the Acer logo.\n\n4. Check the system files: The manual suggests checking the system files to see if there are any errors or missing files. To do this, open the Command Prompt and type \"sfc /scannow\" (replace \"sfc\" with \"sfc /scannow\" if it's not installed).\n\n5. Check the hardware: The manual suggests checking the hardware to see if it's compatible with the Acer computer. You can do this by checking the Acer website or contacting Acer's customer support.\n\n6",
+          "latency_ms": 28487,
+          "word_count": 200,
+          "reported_model": "qwen2.5:0.5b",
+          "ollama_total_duration_ms": 28437,
+          "ollama_eval_count": 256
+        },
+        "smollm2:360m": {
+          "answer": "If your Acer computer is not starting Windows, follow these steps to troubleshoot and recover your system:\n\n1. **Restart Your Computer**: Press the power button to turn on your computer. This will allow you to access the BIOS settings.\n\n2. **Check for Windows Errors**: Press the Windows key + R to open the Run dialog box. Type \"msconfig\" and press Enter. This will open the Windows System Configuration tool.\n\n3. **Restore Windows**: Click on \"Restore\" in the System Configuration tool. This will restore Windows to its factory default settings.\n\n4. **Backup Your Data**: If you have files or data on your computer, you can create a file history backup by clicking on \"Backup\" in the System Configuration tool. This will create a backup of your files and restore them if the originals are lost, damaged, or deleted.\n\n5. **Create a Factory Default Backup**: Click on \"Factory Data\" in the System Configuration tool. This will create a factory default backup of your computer's settings and files.\n\n6. **Restore Factory Default**: Click on \"Restore\" in the Factory Data tool. This will restore your computer's settings and files to their factory default settings.",
+          "latency_ms": 32238,
+          "word_count": 190,
+          "reported_model": "smollm2:360m",
+          "ollama_total_duration_ms": 32204,
+          "ollama_eval_count": 256
+        }
+      }
+    },
+    {
+      "id": "wireless-connection",
+      "question": "How do I connect my Acer computer to a wireless network?",
+      "retrieved_context": [
+        {
+          "content": "Internet and online security - 63 services. Read carefully the documentation supplied with your Access point/router for detailed setup instructions. Wireless adapter Most computers feature a wireless module and Wi-Fi button that turns the network connection on or off. You may also turn your wireless network on or off, or control what is shared over the network with the network management options. Surf the Net! To surf the internet, you need a program called an internet browser. Microsoft Edge provides an easy and secure web browsing experience. As soon as you have your internet access installed and you are connected, from the Start Menu, click the Microsoft Edge app or the icon located in the taskbar and take your internet experience to a new level! Acer website To get you started why not visit our website, www.acer.com. Acer is dedicated to provide you with on-going personalized support. Check out our Support section to get help tailored to your needs. www.acer.com is your portal to",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 68,
+          "distance": 0.4319230914115906
+        },
+        {
+          "content": "two or more computers without using wires. Once connected to WLAN, you can access the internet. You can also share files, other devices, and even your internet connection itself. Your computer's wireless connection is turned on by default and Windows will detect and display a li st of available networks during setup. Select your network and enter the password if required. Acer computers feature a Flight mode hotkey that turns the network connection on or off. You can use the network management options to turn your wireless network on/off or control what is shared over the network. Warning Using wireless devices while flying in aircraft may be prohibited. All wireless devices must be switched off before boarding an aircraft and during take-off, as they may be dangerous to the operation of the aircraft, disrupt communications, and even be illegal. You may turn on your computer\u2019s wireless devices only when informed that it is safe to do so by the cabin crew.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 38,
+          "distance": 0.45473355054855347
+        },
+        {
+          "content": "ed to provide you with on-going personalized support. Check out our Support section to get help tailored to your needs. www.acer.com is your portal to a world of online activities and services: visit us regularly for the latest information and downloads! Internet security software To help you stay ahead of cybercriminals, Acer has partnered with McAfee to offer you security for all your devices. Warning Using wireless devices while flying in aircraft may be prohibited. Switch off all devices before boarding an aircraft; they may be dangerous to the operation of the aircraft, disrupt communications, and even be illegal. After take off, ask the cabin crew if you may enable Wi-Fi.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 68,
+          "distance": 0.5257341861724854
+        },
+        {
+          "content": "34 - Connecting to the Internet To connect to a wireless network, please follow the steps below. 1.Ensure you have a wireless router/access point and current internet connection through the ISP of your choice. Make a note of the wireless network\u2019s name and password (if necessary). If you are trying to connect to a public network (such as at a coffeeshop), make sure you have the wireless network\u2019s name. 2.Click Network icon in the notification area. 3.Select Manage WiFi connections. Note Please refer to your ISP or router documentation for details on connecting to the internet. Note If Wi-Fi is turned off, please click Wi-Fi icon to turn it on.",
+          "source": "acer_manual.pdf",
+          "category": null,
+          "page": 39,
+          "distance": 0.5387039184570312
+        }
+      ],
+      "prompt": "Technical support question:\nHow do I connect my Acer computer to a wireless network?\n\nKnowledge-base context:\n[Source: acer_manual.pdf, page 68]\nInternet and online security - 63 services. Read carefully the documentation supplied with your Access point/router for detailed setup instructions. Wireless adapter Most computers feature a wireless module and Wi-Fi button that turns the network connection on or off. You may also turn your wireless network on or off, or control what is shared over the network with the network management options. Surf the Net! To surf the internet, you need a program called an internet browser. Microsoft Edge provides an easy and secure web browsing experience. As soon as you have your internet access installed and you are connected, from the Start Menu, click the Microsoft Edge app or the icon located in the taskbar and take your internet experience to a new level! Acer website To get you started why not visit our website, www.acer.com. Acer is dedicated to provide you with on-going personalized support. Check out our Support section to get help tailored to your needs. www.acer.com is your portal to\n\n[Source: acer_manual.pdf, page 38]\ntwo or more computers without using wires. Once connected to WLAN, you can access the internet. You can also share files, other devices, and even your internet connection itself. Your computer's wireless connection is turned on by default and Windows will detect and display a li st of available networks during setup. Select your network and enter the password if required. Acer computers feature a Flight mode hotkey that turns the network connection on or off. You can use the network management options to turn your wireless network on/off or control what is shared over the network. Warning Using wireless devices while flying in aircraft may be prohibited. All wireless devices must be switched off before boarding an aircraft and during take-off, as they may be dangerous to the operation of the aircraft, disrupt communications, and even be illegal. You may turn on your computer\u2019s wireless devices only when informed that it is safe to do so by the cabin crew.\n\n[Source: acer_manual.pdf, page 68]\ned to provide you with on-going personalized support. Check out our Support section to get help tailored to your needs. www.acer.com is your portal to a world of online activities and services: visit us regularly for the latest information and downloads! Internet security software To help you stay ahead of cybercriminals, Acer has partnered with McAfee to offer you security for all your devices. Warning Using wireless devices while flying in aircraft may be prohibited. Switch off all devices before boarding an aircraft; they may be dangerous to the operation of the aircraft, disrupt communications, and even be illegal. After take off, ask the cabin crew if you may enable Wi-Fi.\n\n[Source: acer_manual.pdf, page 39]\n34 - Connecting to the Internet To connect to a wireless network, please follow the steps below. 1.Ensure you have a wireless router/access point and current internet connection through the ISP of your choice. Make a note of the wireless network\u2019s name and password (if necessary). If you are trying to connect to a public network (such as at a coffeeshop), make sure you have the wireless network\u2019s name. 2.Click Network icon in the notification area. 3.Select Manage WiFi connections. Note Please refer to your ISP or router documentation for details on connecting to the internet. Note If Wi-Fi is turned off, please click Wi-Fi icon to turn it on.\n\nProvide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next.",
+      "answers": {
+        "qwen2.5-coder:0.5b-instruct": {
+          "answer": "To connect your Acer computer to a wireless network, follow these steps:\n\n1. **Ensure you have a wireless router/access point and current internet connection through the ISP of your choice. Make a note of the wireless network\u2019s name and password (if necessary). If you are trying to connect to a public network (such as at a coffee shop), make sure you have the wireless network\u2019s name.**\n\n2. **Click Network icon in the notification area.**\n3. **Select Manage WiFi connections.**\n\n4. **Note Please refer to your ISP or router documentation for details on connecting to the internet.**\n\nIf the supplied context is insufficient, you can check the following:\n\n- **Check your router\u2019s settings:** Ensure your router is configured to allow wireless connections.\n- **Check your internet connection:** Ensure you have a stable internet connection.\n- **Check your device\u2019s Wi-Fi settings:** Ensure your device is set to connect to the correct Wi-Fi network.\n- **Check your device\u2019s security settings:** Ensure your device is not set to restrict Wi-Fi access.\n\nIf you continue to experience issues, you may need to contact your ISP or router for further assistance.",
+          "latency_ms": 28577,
+          "word_count": 185,
+          "reported_model": "qwen2.5-coder:0.5b-instruct",
+          "ollama_total_duration_ms": 28537,
+          "ollama_eval_count": 234
+        },
+        "qwen2.5:0.5b": {
+          "answer": "To connect your Acer computer to a wireless network, follow these steps:\n\n1. Ensure you have a wireless router/access point and a current internet connection through the ISP of your choice.\n2. Make a note of the wireless network's name and password (if necessary).\n3. Click the Network icon in the notification area.\n4. Select Manage WiFi connections.\n5. Note the details of your wireless network's name and password.\n\nIf the wireless network is turned off, click the Wi-Fi icon to turn it on.\n\nIf you are trying to connect to a public network (such as at a coffee shop), make sure you have the wireless network's name.\n\nIf you encounter any issues or errors during the connection process, refer to your ISP or router documentation for more detailed instructions.",
+          "latency_ms": 23219,
+          "word_count": 130,
+          "reported_model": "qwen2.5:0.5b",
+          "ollama_total_duration_ms": 23192,
+          "ollama_eval_count": 156
+        },
+        "smollm2:360m": {
+          "answer": "To connect your Acer computer to a wireless network, follow these steps:\n\n1. Ensure you have a wireless router/access point and a current internet connection through your ISP. Make a note of the wireless network's name and password (if necessary). If you are trying to connect to a public network (such as at a coffee shop), make sure you have the wireless network's name.\n\n2. Click the Network icon in the notification area.\n\n3. Select Manage WiFi connections.\n\n4. Note Please refer to your ISP or router documentation for details on connecting to the internet.\n\n5. If Wi-Fi is turned off, click the Wi-Fi icon to turn it on.\n\nIf you are unable to connect to the internet, check the following:\n\n- Ensure that your internet connection is active and working properly.\n- Verify that the wireless network name and password are correct.\n- If you are connected to a public network, check if the network name and password are correct.\n\nIf you are still having issues, please contact your ISP or the technical support team for assistance.",
+          "latency_ms": 31066,
+          "word_count": 178,
+          "reported_model": "smollm2:360m",
+          "ollama_total_duration_ms": 31029,
+          "ollama_eval_count": 227
+        }
+      }
+    }
+  ]
+}

@@ -18,10 +18,13 @@ def get_llm_client(settings: Settings = Depends(get_settings)) -> OllamaCodeLlam
 async def generate_response(
     request: GenerationRequest,
     client: OllamaCodeLlamaClient = Depends(get_llm_client),
+    settings: Settings = Depends(get_settings),
 ) -> GenerationResponse:
     """Generate a response through the configured Ollama model."""
+    if request.model and request.model not in settings.ollama_models:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="The selected model is not available.")
     try:
-        answer, model = await client.generate(request.prompt, request.system_prompt)
+        answer, model = await client.generate(request.prompt, request.system_prompt, request.model)
     except OllamaConnectionError as error:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Ollama generation service is unavailable.") from error
     except OllamaResponseError as error:
