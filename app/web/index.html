@@ -14,7 +14,7 @@
           <a class="active" href="#knowledge-base"><span>⌂</span>Workspace</a>
           <a href="#knowledge-base"><span>▣</span>Documents</a>
           <a href="#live-trace"><span>◷</span>History</a>
-          <a href="#answer-card"><span>⚙</span>Settings</a>
+          <a href="#evaluation"><span>◈</span>Evaluation</a>
         </nav>
         <div class="sidebar-bottom">
           <div class="model-status"><span></span><div><strong>Local AI Ready</strong><small>Ollama · Local model</small></div></div>
@@ -67,6 +67,14 @@
               <section class="sources-zone" aria-labelledby="sources-heading"><div class="source-tabs"><strong id="sources-heading">Sources</strong><span>Relevant chunks</span></div><p id="context-summary" class="source-summary">No sources yet</p><div id="sources" class="sources"></div></section>
             </div>
             <dl id="llm-info" class="llm-info"></dl>
+          </article>
+
+          <article id="evaluation" class="workflow-card evaluation-card" aria-labelledby="evaluation-heading">
+            <div class="step-marker">5</div>
+            <div class="card-head"><div><h2 id="evaluation-heading">LLM Evaluation</h2><p>Compare three local models on the same 24 technical-support and RAG tasks.</p></div><button id="run-evaluation" class="button" type="button">Run evaluation <span>›</span></button></div>
+            <div class="evaluation-controls"><div><strong>Models to compare</strong><div id="evaluation-models" class="evaluation-models" aria-label="Models included in evaluation"></div></div><p id="evaluation-status" class="request-status" aria-live="polite">Load a saved evaluation or run a new comparison.</p></div>
+            <div id="evaluation-empty" class="evaluation-empty">No completed evaluation yet. The run uses the same questions, RAG context, prompt, and decoding settings for all three models.</div>
+            <div id="evaluation-results" class="evaluation-results" hidden><div class="evaluation-summary"><span id="evaluation-question-count"></span><span id="evaluation-generated-at"></span><span>Heuristic quality metrics · transparent methodology</span></div><div id="evaluation-comparison" class="evaluation-comparison"></div><p class="evaluation-note">Accuracy, relevance, retrieval quality, and hallucination rate are deterministic, transparent proxy metrics. Open the raw report for each answer, source context, tokens, and resource sample.</p></div>
           </article>
         </section>
       </main>

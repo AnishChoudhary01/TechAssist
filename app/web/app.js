@@ -23,6 +23,14 @@ const knowledgeState = document.querySelector("#knowledge-state");
 const askGuidance = document.querySelector("#ask-guidance");
 const documentCount = document.querySelector("#document-count");
 const indexedDocuments = document.querySelector("#indexed-documents");
+const evaluationModels = document.querySelector("#evaluation-models");
+const runEvaluationButton = document.querySelector("#run-evaluation");
+const evaluationStatus = document.querySelector("#evaluation-status");
+const evaluationEmpty = document.querySelector("#evaluation-empty");
+const evaluationResults = document.querySelector("#evaluation-results");
+const evaluationComparison = document.querySelector("#evaluation-comparison");
+const evaluationQuestionCount = document.querySelector("#evaluation-question-count");
+const evaluationGeneratedAt = document.querySelector("#evaluation-generated-at");
 let uploadedCount = 0;
 let knowledgeReady = false;
 
@@ -63,12 +71,50 @@ function renderLlmInfo(data) {
   responseMeta.replaceChildren(); [data.model, `${data.sources.length} source${data.sources.length === 1 ? "" : "s"}`].forEach((value) => responseMeta.append(element("span", value)));
 }
 
+function renderEvaluationModels(models, defaultModel) {
+  evaluationModels.replaceChildren();
+  models.forEach((model, index) => {
+    const label = document.createElement("label");
+    const input = document.createElement("input");
+    input.type = "checkbox"; input.value = model; input.checked = index < 3;
+    label.append(input, document.createTextNode(model === defaultModel ? `${model} (default)` : model));
+    evaluationModels.append(label);
+  });
+}
+
+function metricCell(value, suffix = "%") { return value == null ? "—" : `${Number(value).toFixed(1)}${suffix}`; }
+
+function renderEvaluation(report) {
+  evaluationEmpty.hidden = true; evaluationResults.hidden = false;
+  evaluationQuestionCount.textContent = `${report.question_count} fixed tasks`;
+  evaluationGeneratedAt.textContent = `Completed ${new Date(report.generated_at_utc).toLocaleString()}`;
+  const table = document.createElement("table"); table.className = "comparison-table";
+  const headings = ["Model", "Accuracy", "Relevance", "Retrieval", "Hallucination ↓", "Tests", "Latency", "Tokens", "CPU", "Memory", "GPU VRAM"];
+  const head = document.createElement("thead"); const headRow = document.createElement("tr"); headings.forEach((heading) => headRow.append(element("th", heading))); head.append(headRow); table.append(head);
+  const body = document.createElement("tbody");
+  report.comparison.forEach((row) => { const tr = document.createElement("tr"); const cells = [row.model, metricCell(row.accuracy_percent), metricCell(row.relevance_percent), metricCell(row.retrieval_quality_percent), metricCell(row.hallucination_rate_percent), metricCell(row.test_pass_rate_percent), metricCell(row.latency_ms, " ms"), `${metricCell(row.prompt_tokens, "")} / ${metricCell(row.completion_tokens, "")}`, metricCell(row.cpu_percent), metricCell(row.memory_mb, " MB"), metricCell(row.gpu_memory_mb, " MB")]; cells.forEach((cell) => tr.append(element("td", cell))); body.append(tr); });
+  table.append(body); evaluationComparison.replaceChildren(table);
+}
+
+async function loadLatestEvaluation() {
+  try { const response = await fetch("/api/v1/evaluation/latest"); if (response.status === 404) return; const report = await response.json(); if (response.ok) renderEvaluation(report); } catch { /* Evaluation remains optional if the API is temporarily unavailable. */ }
+}
+
+async function pollEvaluation(runId) {
+  const response = await fetch(`/api/v1/evaluation/status/${runId}`); const data = await response.json();
+  if (!response.ok || data.status === "failed") { throw new Error(data.detail || "Evaluation run failed."); }
+  if (data.status === "completed") { evaluationStatus.textContent = "Evaluation complete."; await loadLatestEvaluation(); return; }
+  evaluationStatus.textContent = "Evaluation running: all 24 questions are being tested against each selected model.";
+  window.setTimeout(() => pollEvaluation(runId).catch((error) => { evaluationStatus.textContent = error.message; runEvaluationButton.disabled = false; }), 3000);
+}
+
 async function loadModelOptions() {
   try {
     const response = await fetch("/api/v1/support/models"); const data = await response.json();
     if (!response.ok || !Array.isArray(data.models)) return;
     modelSelect.replaceChildren();
     data.models.forEach((model) => { const option = document.createElement("option"); option.value = model; option.textContent = model.replace(":", " · "); option.selected = model === data.default_model; modelSelect.append(option); });
+    renderEvaluationModels(data.models, data.default_model);
   } catch { /* The default compact model remains selectable when the API is unreachable. */ }
 }
 
@@ -95,3 +141,11 @@ form.addEventListener("submit", async (event) => {
 });
 
 loadModelOptions();
+loadLatestEvaluation();
+
+runEvaluationButton.addEventListener("click", async () => {
+  const models = [...evaluationModels.querySelectorAll("input:checked")].map((input) => input.value);
+  if (models.length !== 3) { evaluationStatus.textContent = "Select exactly three models to start a fair comparison."; return; }
+  runEvaluationButton.disabled = true; evaluationStatus.textContent = "Starting controlled evaluation…";
+  try { const response = await fetch("/api/v1/evaluation/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ models }) }); const data = await response.json(); if (!response.ok) throw new Error(data.detail || "Unable to start evaluation."); await pollEvaluation(data.run_id); } catch (error) { evaluationStatus.textContent = error.message; runEvaluationButton.disabled = false; }
+});

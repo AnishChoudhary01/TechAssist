@@ -55,6 +55,13 @@ def test_model_options_expose_only_compact_configured_models() -> None:
     ]
 
 
+def test_evaluation_questions_endpoint_exposes_fixed_set() -> None:
+    response = TestClient(create_app()).get("/api/v1/evaluation/questions")
+
+    assert response.status_code == 200
+    assert response.json()["count"] == 24
+
+
 def test_ask_support_question_rejects_an_unconfigured_model() -> None:
     response = TestClient(create_app()).post(
         "/api/v1/support/ask",

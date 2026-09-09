@@ -1,18 +1,26 @@
 [
-  {
-    "id": "battery-low",
-    "question": "What should I do when my Acer laptop shows a battery-low warning?"
-  },
-  {
-    "id": "supervisor-password",
-    "question": "How do I set a Supervisor Password in the Acer BIOS utility?"
-  },
-  {
-    "id": "windows-recovery",
-    "question": "My Acer computer will not start Windows. What recovery steps does the manual recommend?"
-  },
-  {
-    "id": "wireless-connection",
-    "question": "How do I connect my Acer computer to a wireless network?"
-  }
+  {"id":"battery-low","category":"troubleshooting","question":"What should I do when my Acer laptop shows a battery-low warning?","expected_terms":["AC adapter","save","power"],"retrieval_terms":["battery-low","AC adapter","save"]},
+  {"id":"battery-charging","category":"troubleshooting","question":"How should I charge the Acer battery safely?","expected_terms":["AC adapter","charge","temperature"],"retrieval_terms":["charging","battery","temperature"]},
+  {"id":"supervisor-password","category":"configuration","question":"How do I set a Supervisor Password in the Acer BIOS utility?","expected_terms":["F2","Security","Set Supervisor Password","F10"],"retrieval_terms":["Supervisor Password","Security","F10"]},
+  {"id":"forgot-password","category":"FAQ","question":"What does the manual recommend if I forget my Supervisor Password?","expected_terms":["dealer","authorized service center"],"retrieval_terms":["forget","Supervisor Password","authorized service center"]},
+  {"id":"bios-access","category":"configuration","question":"How do I open the Acer BIOS utility?","expected_terms":["F2","Acer logo"],"retrieval_terms":["BIOS utility","F2","Acer logo"]},
+  {"id":"boot-sequence","category":"configuration","question":"Where do I change the boot sequence in the Acer BIOS utility?","expected_terms":["BIOS","Boot"],"retrieval_terms":["Boot sequence","BIOS utility","Boot"]},
+  {"id":"windows-recovery","category":"troubleshooting","question":"My Acer computer will not start Windows. What recovery steps does the manual recommend?","expected_terms":["recovery tools","reset","Windows","backup"],"retrieval_terms":["Recovery","reset","Windows backup"]},
+  {"id":"file-history","category":"configuration","question":"How do I create a file history backup according to the Acer recovery guide?","expected_terms":["Settings","Accounts","Windows backup"],"retrieval_terms":["file history","Settings","Windows backup"]},
+  {"id":"wireless-connection","category":"configuration","question":"How do I connect my Acer computer to a wireless network?","expected_terms":["Network icon","Manage WiFi connections","password"],"retrieval_terms":["wireless network","Manage WiFi","password"]},
+  {"id":"wifi-disabled","category":"troubleshooting","question":"What should I check if Wi-Fi is turned off on my Acer computer?","expected_terms":["Wi-Fi icon","network","Flight mode"],"retrieval_terms":["Wi-Fi","turned off","Flight mode"]},
+  {"id":"flight-mode","category":"FAQ","question":"What does the manual say about using wireless devices during a flight?","expected_terms":["switched off","aircraft","cabin crew"],"retrieval_terms":["aircraft","wireless","cabin crew"]},
+  {"id":"internet-security","category":"troubleshooting","question":"What basic steps does the Acer manual recommend to protect a computer from internet threats?","expected_terms":["updates","security","malware"],"retrieval_terms":["cybercriminal","updates","malware"]},
+  {"id":"password-at-boot","category":"configuration","question":"How can Password on Boot be enabled after setting a Supervisor Password?","expected_terms":["Security","Supervisor Password","Password on Boot","F10"],"retrieval_terms":["Password on Boot","Supervisor Password","Security"]},
+  {"id":"password-retries","category":"FAQ","question":"What happens after three incorrect password attempts during startup?","expected_terms":["three","halts","power button"],"retrieval_terms":["three chances","system halts","power button"]},
+  {"id":"battery-lifespan","category":"FAQ","question":"Which charging habits can reduce the useful lifespan of the Acer battery?","expected_terms":["100%","temperature","charging"],"retrieval_terms":["lifespan","100%","temperatures"]},
+  {"id":"battery-storage","category":"FAQ","question":"What temperature range does the manual recommend for keeping the battery?","expected_terms":["15","25","temperature"],"retrieval_terms":["15","25","battery"]},
+  {"id":"safe-battery-use","category":"troubleshooting","question":"What should I avoid doing with an Acer battery or charger that appears damaged?","expected_terms":["damaged","charger","battery"],"retrieval_terms":["damaged","charger","battery"]},
+  {"id":"windows-backup","category":"configuration","question":"Where in Windows settings does the manual direct users to start a Windows backup?","expected_terms":["Settings","Accounts","Windows backup"],"retrieval_terms":["Settings","Accounts","Windows backup"]},
+  {"id":"factory-reset","category":"troubleshooting","question":"What does resetting the Acer PC do to Windows, settings, personal files, and installed apps?","expected_terms":["reinstall Windows","factory defaults","personal files","apps"],"retrieval_terms":["reinstall Windows","factory defaults","personal files","apps"]},
+  {"id":"browser-access","category":"FAQ","question":"Which browser does the Acer guide mention for accessing the internet?","expected_terms":["Microsoft Edge"],"retrieval_terms":["Microsoft Edge","browser"]},
+  {"id":"router-documentation","category":"FAQ","question":"Where should I look for detailed router or access-point setup instructions?","expected_terms":["router documentation","access point","ISP"],"retrieval_terms":["router","Access point","documentation"]},
+  {"id":"system-updates","category":"troubleshooting","question":"Why does the manual recommend installing software updates promptly?","expected_terms":["vulnerabilities","security","malware"],"retrieval_terms":["updates","vulnerabilities","malware"]},
+  {"id":"code-port-validation","category":"code-generation","question":"Write only Python code for a function named is_valid_port(value). It must return True only when value is an integer from 1 through 65535 inclusive; return False for every other value.","expected_terms":["is_valid_port","True","False"],"retrieval_terms":[],"code_test":"is_valid_port"},
+  {"id":"rag-source-check","category":"RAG","question":"Based only on the retrieved Acer manual context, summarize the safe response to a low-battery warning and state what to do if AC power is unavailable.","expected_terms":["AC adapter","save","close","turn off"],"retrieval_terms":["battery-low","AC adapter","Save all necessary files"]}
 ]

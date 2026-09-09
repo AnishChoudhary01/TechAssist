@@ -11,7 +11,7 @@
 ## Controlled conditions
 
 - **Application:** unchanged TechAssist Week 3 RAG technical-support assistant.
-- **Questions:** the four fixed questions in `questions.json`.
+- **Questions:** the fixed 24-question set in `questions.json`.
 - **Knowledge base:** the existing ChromaDB collection; the harness retrieves each
   question once and supplies the same frozen result to each model.
 - **Prompt:** the production system prompt and prompt template from
@@ -38,8 +38,10 @@ Run `evaluation/evaluate_models.py` to generate the raw, auditable result file.
 ## Run results — 2026-09-09
 
 Raw prompts, retrieved chunks, responses, and timings are saved in
-`results/model_comparison_2026-09-09.json`. The figures below summarize the
-four fixed questions in that run.
+`results/model_comparison_2026-09-09.json`. The figures below summarize a
+historical four-question pilot run; it is retained as a baseline. Use the
+in-app Evaluation page or `evaluate_models.py` to produce the current 24-task
+report at `results/latest.json`.
 
 | Model | Mean latency | Mean answer length | Groundedness | Technical correctness | Helpfulness | Instruction following | Overall |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

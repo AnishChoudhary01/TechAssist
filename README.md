@@ -146,14 +146,25 @@ and Ollama models persist in named Docker volumes.
 
 ## Evaluate compact local models
 
-The evaluation harness compares Qwen2.5-Coder 0.5B, Qwen2.5 0.5B, and SmolLM2
-360M with the same questions, retrieved RAG context, production prompt, and
-generation settings. Start Ollama and the RAG service, then run:
+The Evaluation section in the UI runs a fixed set of 24 technical-support,
+configuration, FAQ, RAG, and code-generation tasks against exactly three
+configured models. Every model receives the same questions, one shared RAG
+retrieval per question, the production prompt, and the same generation settings.
+It persists raw answers and a comparison with correctness/relevance proxies,
+retrieval quality, hallucination proxy rate, code test-pass rate, latency, token
+usage, CPU, memory, and Ollama-reported VRAM.
+
+Open `http://127.0.0.1:8000/`, choose **Evaluation** in the sidebar, and select
+**Run evaluation**. The non-blocking run may take several minutes on CPU-only
+hardware. Alternatively, start Ollama and the RAG service, then run:
 
 ```powershell
 .\.venv\Scripts\python .\evaluation\evaluate_models.py `
   --output .\evaluation\results\model_comparison.json
 ```
 
-See `evaluation/MODEL_COMPARISON.md` for the scoring rubric and controlled
-conditions.
+Results are saved to `evaluation/results/latest.json`. See
+`evaluation/MODEL_COMPARISON.md` for the scoring rubric and controlled
+conditions. The quality metrics are transparent deterministic proxies, not an
+LLM-as-a-judge score; the raw report retains every answer and retrieved chunk for
+review.
