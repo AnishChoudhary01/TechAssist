@@ -28,6 +28,7 @@ TEMPERATURE = 0.2
 SEED = 42
 NUM_PREDICT = 256
 SUSPICIOUS_COMMANDS = ("chkdsk", "sfc /scannow", "msconfig", "diskpart", "regedit", "wget", "curl")
+RAG_ANALYSIS_IDS = ("battery-low", "supervisor-password", "windows-recovery", "wireless-connection", "factory-reset", "rag-source-check")
 
 
 def load_questions() -> list[dict[str, Any]]:
@@ -67,10 +68,54 @@ def _term_coverage(text: str, terms: list[str]) -> float:
 
 def _hallucination_rate(answer: str, context: str) -> float:
     """Return an auditable conservative proxy, not an LLM-judge claim of fact."""
-    lowered_answer, lowered_context = answer.lower(), context.lower()
-    unsupported = [command for command in SUSPICIOUS_COMMANDS if command in lowered_answer and command not in lowered_context]
+    unsupported = _unsupported_commands(answer, context)
     sentences = max(1, len(re.findall(r"[.!?]+", answer)))
     return round(min(100, 100 * len(unsupported) / sentences), 1)
+
+
+def _unsupported_commands(answer: str, context: str) -> list[str]:
+    """List tracked commands that were generated without RAG support."""
+    lowered_answer, lowered_context = answer.lower(), context.lower()
+    return [command for command in SUSPICIOUS_COMMANDS if command in lowered_answer and command not in lowered_context]
+
+
+def _rag_analysis(results: list[dict[str, Any]], models: list[str]) -> list[dict[str, Any]]:
+    """Build reviewable retrieval-to-response records for selected evaluation tasks."""
+    analyses: list[dict[str, Any]] = []
+    for item in results:
+        if item["id"] not in RAG_ANALYSIS_IDS:
+            continue
+        retrieval_terms = item.get("retrieval_terms", [])
+        expected_terms = item["expected_terms"]
+        context = format_context(item["retrieved_context"])
+        chunks = []
+        for chunk in item["retrieved_context"]:
+            matched_terms = [term for term in retrieval_terms if term.lower() in chunk["content"].lower()]
+            chunks.append({
+                "source": chunk["source"], "page": chunk.get("page"), "content": chunk["content"],
+                "classification": "relevant" if matched_terms else "irrelevant",
+                "relevant_information": matched_terms,
+            })
+        irrelevant_count = sum(chunk["classification"] == "irrelevant" for chunk in chunks)
+        retrieval_quality = _term_coverage(context, retrieval_terms)
+        context_quality = round((retrieval_quality + _percent(len(chunks) - irrelevant_count, len(chunks))) / 2, 1)
+        model_reviews = []
+        for model in models:
+            answer = item["answers"][model]
+            correct_information = [term for term in expected_terms if term.lower() in answer["answer"].lower()]
+            unsupported = _unsupported_commands(answer["answer"], context)
+            response_quality = round((answer["metrics"]["accuracy_percent"] + answer["metrics"]["relevance_percent"] + (100 - answer["metrics"]["hallucination_rate_percent"])) / 3, 1)
+            model_reviews.append({
+                "model": model, "response": answer["answer"], "correct_response_information": correct_information,
+                "hallucination_despite_context": unsupported, "response_quality_percent": response_quality,
+            })
+        analyses.append({
+            "id": item["id"], "question": item["question"], "retrieval_quality_percent": retrieval_quality,
+            "context_quality_percent": context_quality, "retrieved_context": chunks,
+            "important_information_missed": [term for term in expected_terms if term.lower() not in context.lower()],
+            "model_reviews": model_reviews,
+        })
+    return analyses
 
 
 def _code_test(answer: str) -> bool | None:
@@ -222,6 +267,13 @@ async def run_evaluation(models: list[str], rag_url: str, ollama_url: str) -> di
         "results": results,
     }
     report["comparison"] = _aggregate(results, models)
+    report["rag_analysis"] = _rag_analysis(results, models)
+    report["rag_analysis_notes"] = {
+        "retrieval_quality": "Expected retrieval-term coverage in all retrieved chunks.",
+        "context_quality": "Retrieval quality combined with the percentage of chunks classified relevant.",
+        "response_quality": "Average of answer accuracy proxy, relevance proxy, and inverse unsupported-command rate.",
+        "review_labels": "Relevant/irrelevant chunks and correct response information use fixed expected terms; hallucination flags only tracked unsupported commands.",
+    }
     RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
     RESULTS_FILE.write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report

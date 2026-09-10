@@ -152,7 +152,11 @@ configured models. Every model receives the same questions, one shared RAG
 retrieval per question, the production prompt, and the same generation settings.
 It persists raw answers and a comparison with correctness/relevance proxies,
 retrieval quality, hallucination proxy rate, code test-pass rate, latency, token
-usage, CPU, memory, and Ollama-reported VRAM.
+usage, CPU, memory, and Ollama-reported VRAM. The same Evaluation page also
+includes a **RAG Analysis** dashboard for selected questions: it presents
+question → retrieved chunks → each model response, labels relevant and
+irrelevant chunks, lists important expected information missed by retrieval, and
+flags tracked hallucinations despite the supplied context.
 
 Open `http://127.0.0.1:8000/`, choose **Evaluation** in the sidebar, and select
 **Run evaluation**. The non-blocking run may take several minutes on CPU-only

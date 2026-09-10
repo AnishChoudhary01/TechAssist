@@ -31,6 +31,10 @@ const evaluationResults = document.querySelector("#evaluation-results");
 const evaluationComparison = document.querySelector("#evaluation-comparison");
 const evaluationQuestionCount = document.querySelector("#evaluation-question-count");
 const evaluationGeneratedAt = document.querySelector("#evaluation-generated-at");
+const ragAnalysisEmpty = document.querySelector("#rag-analysis-empty");
+const ragAnalysisContent = document.querySelector("#rag-analysis-content");
+const ragAnalysisTable = document.querySelector("#rag-analysis-table");
+const ragAnalysisCases = document.querySelector("#rag-analysis-cases");
 let uploadedCount = 0;
 let knowledgeReady = false;
 
@@ -84,6 +88,31 @@ function renderEvaluationModels(models, defaultModel) {
 
 function metricCell(value, suffix = "%") { return value == null ? "—" : `${Number(value).toFixed(1)}${suffix}`; }
 
+function listText(items, fallback = "None") { return items?.length ? items.join(", ") : fallback; }
+
+function renderRagAnalysis(report) {
+  const cases = report.rag_analysis;
+  if (!Array.isArray(cases) || !cases.length) { ragAnalysisEmpty.hidden = false; ragAnalysisContent.hidden = true; return; }
+  ragAnalysisEmpty.hidden = true; ragAnalysisContent.hidden = false;
+  const table = document.createElement("table"); table.className = "comparison-table rag-relationship-table";
+  const head = document.createElement("thead"); const row = document.createElement("tr"); ["Question", "Retrieval quality", "Context quality", ...report.models.map((model) => `${model} response quality`)].forEach((heading) => row.append(element("th", heading))); head.append(row); table.append(head);
+  const body = document.createElement("tbody");
+  cases.forEach((analysis) => { const tableRow = document.createElement("tr"); tableRow.append(element("td", analysis.question)); tableRow.append(element("td", metricCell(analysis.retrieval_quality_percent))); tableRow.append(element("td", metricCell(analysis.context_quality_percent))); analysis.model_reviews.forEach((review) => tableRow.append(element("td", metricCell(review.response_quality_percent)))); body.append(tableRow); });
+  table.append(body); ragAnalysisTable.replaceChildren(table);
+  ragAnalysisCases.replaceChildren();
+  cases.forEach((analysis, index) => {
+    const detail = document.createElement("details"); detail.open = index === 0; detail.className = "rag-case";
+    detail.append(element("summary", `${analysis.question} · Retrieval ${metricCell(analysis.retrieval_quality_percent)} → Context ${metricCell(analysis.context_quality_percent)}`));
+    const layout = document.createElement("div"); layout.className = "rag-case-layout";
+    const contextColumn = document.createElement("section"); contextColumn.append(element("h4", "Retrieved context"));
+    analysis.retrieved_context.forEach((chunk) => { const chunkCard = document.createElement("article"); chunkCard.className = `rag-chunk ${chunk.classification}`; chunkCard.append(element("strong", `${chunk.classification === "relevant" ? "Relevant" : "Irrelevant"} · ${chunk.source}${chunk.page ? ` p.${chunk.page}` : ""}`), element("small", `Matched retrieval information: ${listText(chunk.relevant_information)}`), element("p", chunk.content)); contextColumn.append(chunkCard); });
+    contextColumn.append(element("p", `Important information missed by retrieval: ${listText(analysis.important_information_missed)}`, "rag-missed"));
+    const responseColumn = document.createElement("section"); responseColumn.append(element("h4", "LLM responses"));
+    analysis.model_reviews.forEach((review) => { const responseCard = document.createElement("article"); responseCard.className = "rag-response"; responseCard.append(element("strong", `${review.model} · Response quality ${metricCell(review.response_quality_percent)}`), element("small", `Correct response information: ${listText(review.correct_response_information)}`), element("small", `Hallucination despite retrieved context: ${listText(review.hallucination_despite_context)}`), element("p", review.response)); responseColumn.append(responseCard); });
+    layout.append(contextColumn, responseColumn); detail.append(layout); ragAnalysisCases.append(detail);
+  });
+}
+
 function renderEvaluation(report) {
   evaluationEmpty.hidden = true; evaluationResults.hidden = false;
   evaluationQuestionCount.textContent = `${report.question_count} fixed tasks`;
@@ -94,6 +123,7 @@ function renderEvaluation(report) {
   const body = document.createElement("tbody");
   report.comparison.forEach((row) => { const tr = document.createElement("tr"); const cells = [row.model, metricCell(row.accuracy_percent), metricCell(row.relevance_percent), metricCell(row.retrieval_quality_percent), metricCell(row.hallucination_rate_percent), metricCell(row.test_pass_rate_percent), metricCell(row.latency_ms, " ms"), `${metricCell(row.prompt_tokens, "")} / ${metricCell(row.completion_tokens, "")}`, metricCell(row.cpu_percent), metricCell(row.memory_mb, " MB"), metricCell(row.gpu_memory_mb, " MB")]; cells.forEach((cell) => tr.append(element("td", cell))); body.append(tr); });
   table.append(body); evaluationComparison.replaceChildren(table);
+  renderRagAnalysis(report);
 }
 
 async function loadLatestEvaluation() {
