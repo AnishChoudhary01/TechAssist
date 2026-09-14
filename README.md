@@ -5,10 +5,9 @@ It ingests technical manuals, troubleshooting guides, FAQs, error-code documents
 and installation/configuration guides, retrieves relevant excerpts with RAG, then
 uses them to ground its troubleshooting response.
 
-The public API service also hosts a single browser UI at `http://127.0.0.1:8000/`.
-It displays the complete answer flow—question, API orchestration, RAG retrieval,
-retrieved chunks/context, Ollama/Qwen generation, and the final answer—in
-one interface.
+The public API service hosts browser pages for document indexing, the technical
+support workspace, and model evaluation. The default URL redirects to the
+workspace at `http://127.0.0.1:8000/workspace`.
 
 All five exercises are implemented:
 
@@ -90,11 +89,12 @@ updates it rather than inserting an additional copy.
 
 ## Use the public API
 
-Open the TechAssist UI at `http://127.0.0.1:8000/`. Use its Knowledge base panel
-to upload a `.txt`, `.md`, or text-based `.pdf` directly; it is chunked, embedded,
-and added to ChromaDB immediately. The same UI lets you ask questions and inspect
-the end-to-end processing trace. The interactive API documentation remains
-available at `http://127.0.0.1:8000/docs`, or call:
+Open the TechAssist workspace at `http://127.0.0.1:8000/workspace`. Use the
+Documents page at `http://127.0.0.1:8000/documents` to upload a `.txt`, `.md`,
+or text-based `.pdf`; it is chunked, embedded, and added to ChromaDB immediately.
+The workspace lets you ask questions and inspect the end-to-end processing trace.
+The interactive API documentation remains available at `http://127.0.0.1:8000/docs`,
+or call:
 
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/support/ask" `
@@ -153,9 +153,9 @@ question → retrieved chunks → each model response, labels relevant and
 irrelevant chunks, lists important expected information missed by retrieval, and
 flags tracked hallucinations despite the supplied context.
 
-Open `http://127.0.0.1:8000/`, choose **Evaluation** in the sidebar, and select
-**Run evaluation**. The non-blocking run may take several minutes on CPU-only
-hardware. Alternatively, start Ollama and the RAG service, then run:
+Open `http://127.0.0.1:8000/evaluation` and select **Run evaluation**. The
+non-blocking run may take several minutes on CPU-only hardware. Alternatively,
+start Ollama and the RAG service, then run:
 
 ```powershell
 .\.venv\Scripts\python .\evaluation\evaluate_models.py `

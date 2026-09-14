@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Documents · TechAssist</title>
+    <link rel="stylesheet" href="/static/styles.css?v=solarshift-1">
+  </head>
+  <body>
+    <div class="app-frame">
+      <aside class="sidebar" aria-label="Workspace navigation">
+        <a class="brand" href="/workspace" aria-label="TechAssist workspace"><span class="brand-logo">✣</span><span><strong>TechAssist</strong><small>Private local AI</small></span></a>
+        <nav class="side-nav" aria-label="Primary navigation">
+          <a class="active" href="/documents"><span>▣</span>Documents</a>
+          <a href="/workspace"><span>⌂</span>Workspace</a>
+          <a href="/evaluation"><span>◈</span>Evaluation</a>
+        </nav>
+        <div class="sidebar-bottom"><div class="model-status"><span></span><div><strong>Local AI Ready</strong><small>Ollama · Local model</small></div></div></div>
+      </aside>
+      <main class="workspace">
+        <header class="workspace-header"><div><h1>Document <span>Library.</span></h1><p>Upload and index technical documents for grounded answers.</p></div><div class="ready-badge"><span></span>Local AI Ready</div></header>
+        <section class="workflow page-workflow">
+          <article class="workflow-card knowledge-card" aria-labelledby="knowledge-heading">
+            <div class="card-head"><div><h2 id="knowledge-heading">Knowledge Base</h2><p>Upload and index your technical documents.</p></div><div class="card-actions"><label class="sr-only" for="document-category">Category</label><input id="document-category" name="category" form="upload-form" type="text" maxlength="100" placeholder="Category (optional)"><button id="upload-button" class="button" form="upload-form" type="submit">Index document <span>›</span></button></div></div>
+            <form id="upload-form" class="knowledge-content">
+              <label id="drop-zone" class="drop-zone" for="document-file"><span class="upload-symbol">☁</span><strong id="file-label">Drag &amp; drop files here</strong><em>or browse</em><small>PDF, Markdown, TXT up to 50 MB</small><input id="document-file" name="file" type="file" accept=".pdf,.md,.txt,application/pdf,text/markdown,text/plain" required></label>
+              <section class="document-list" aria-labelledby="documents-heading"><div class="list-heading"><h3 id="documents-heading">Indexed documents <span id="document-count">(0)</span></h3><span id="knowledge-state" class="index-state">Waiting</span></div><div id="indexed-documents" class="indexed-documents"><p class="empty-documents">No documents indexed yet.</p></div></section>
+            </form>
+            <p id="upload-status" class="notice" aria-live="polite" hidden></p>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script src="/static/documents.js?v=pages-1"></script>
+  </body>
+</html>

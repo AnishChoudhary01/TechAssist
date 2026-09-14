@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -38,9 +38,24 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=500, content={"detail": str(exc)[:400] or "Internal Server Error"})
 
     @app.get("/", include_in_schema=False)
-    async def application_ui() -> FileResponse:
-        """Serve the single-page TechAssist workflow UI."""
-        return FileResponse(web_directory / "index.html")
+    async def application_ui() -> RedirectResponse:
+        """Send the browser UI entry point to the workspace."""
+        return RedirectResponse(url="/workspace", status_code=307)
+
+    @app.get("/documents", include_in_schema=False)
+    async def documents_ui() -> FileResponse:
+        """Serve the document ingestion workspace."""
+        return FileResponse(web_directory / "documents.html")
+
+    @app.get("/workspace", include_in_schema=False)
+    async def workspace_ui() -> FileResponse:
+        """Serve the technical-support analysis workspace."""
+        return FileResponse(web_directory / "workspace.html")
+
+    @app.get("/evaluation", include_in_schema=False)
+    async def evaluation_ui() -> FileResponse:
+        """Serve the model evaluation workspace."""
+        return FileResponse(web_directory / "evaluation.html")
 
     @app.get("/health", tags=["health"])
     async def health_check() -> dict[str, str]:

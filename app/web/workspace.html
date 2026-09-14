@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Workspace · TechAssist</title>
+    <link rel="stylesheet" href="/static/styles.css?v=solarshift-1">
+  </head>
+  <body>
+    <div class="app-frame">
+      <aside class="sidebar" aria-label="Workspace navigation">
+        <a class="brand" href="/workspace" aria-label="TechAssist workspace"><span class="brand-logo">✣</span><span><strong>TechAssist</strong><small>Private local AI</small></span></a>
+        <nav class="side-nav" aria-label="Primary navigation">
+          <a href="/documents"><span>▣</span>Documents</a>
+          <a class="active" href="/workspace"><span>⌂</span>Workspace</a>
+          <a href="/evaluation"><span>◈</span>Evaluation</a>
+        </nav>
+        <div class="sidebar-bottom"><div class="model-status"><span></span><div><strong>Local AI Ready</strong><small>Ollama · Local model</small></div></div></div>
+      </aside>
+      <main class="workspace">
+        <header class="workspace-header"><div><h1>Ask. <span>Understand.</span></h1><p>Build answers from indexed documents, with every retrieval and model step visible.</p></div><div class="ready-badge"><span></span>Local AI Ready</div></header>
+        <section class="workflow page-workflow">
+          <article class="workflow-card ask-card" aria-labelledby="ask-heading">
+            <div class="card-head"><div><h2 id="ask-heading">Ask</h2><p id="ask-guidance">Ask a technical question. With Use RAG on, answers are grounded in retrieved documents.</p></div><div class="ask-actions"><label class="rag-toggle" for="rag-toggle"><input id="rag-toggle" type="checkbox" checked><span>Use RAG</span></label><label class="model-picker" for="model-select"><span>Model</span><select id="model-select" name="model" form="question-form" aria-label="Local language model"><option value="qwen2.5-coder:0.5b-instruct">Qwen2.5-Coder 0.5B</option></select></label><button id="submit-button" class="button" form="question-form" type="submit">Analyze issue <span>›</span></button></div></div>
+            <form id="question-form"><label class="sr-only" for="question">Technical support question</label><textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="Type your technical support question here..."></textarea><div class="question-footer"><span id="question-count">0 / 4000</span><span id="request-status" class="request-status" aria-live="polite">Ready</span></div></form>
+            <p id="error-message" class="notice notice-error" role="alert" hidden></p>
+          </article>
+          <article class="workflow-card trace-card" aria-labelledby="trace-heading">
+            <div class="card-head"><div><h2 id="trace-heading">Live System Trace</h2><p id="flow-summary">See every TechAssist step used to build the answer.</p></div><span class="chevron">⌃</span></div>
+            <ol id="flow" class="trace-flow" aria-live="polite">
+              <li data-stage="User question received"><span class="trace-icon">?</span><div><strong>Question received</strong><small>Waiting...</small></div></li><li data-stage="Knowledge base / RAG retrieval"><span class="trace-icon">▣</span><div><strong>Retrieving documents</strong><small>Waiting...</small></div></li><li data-stage="Relevant chunks selected"><span class="trace-icon">◫</span><div><strong>Relevant chunks</strong><small>Waiting...</small></div></li><li data-stage="Relevant context assembled"><span class="trace-icon">▤</span><div><strong>Context assembled</strong><small>Waiting...</small></div></li><li data-stage="Ollama / LLM generation"><span class="trace-icon">✦</span><div><strong>Generating answer</strong><small>Waiting...</small></div></li><li data-stage="Final response returned"><span class="trace-icon">✓</span><div><strong>Answer ready</strong><small>Waiting...</small></div></li>
+            </ol>
+          </article>
+          <article id="answer-card" class="workflow-card analysis-card is-empty" aria-labelledby="analysis-heading">
+            <div class="card-head"><div><h2 id="analysis-heading">AI Analysis</h2><p id="analysis-guidance">Answer with sources, grounded in your documents.</p></div><div id="response-meta" class="response-meta"></div></div>
+            <div class="analysis-layout"><section class="answer-zone"><div id="answer-empty" class="answer-empty"><span>✦</span><div><strong>Your answer will appear here</strong><p>Upload documents and ask a question to get started.</p></div></div><article id="answer" class="answer" aria-live="polite"></article></section><section class="sources-zone" aria-labelledby="sources-heading"><div class="source-tabs"><strong id="sources-heading">Sources</strong><span id="sources-mode">Relevant chunks</span></div><p id="context-summary" class="source-summary">No sources yet</p><div id="sources" class="sources"></div></section></div>
+            <dl id="llm-info" class="llm-info"></dl>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script src="/static/workspace.js?v=pages-1"></script>
+  </body>
+</html>
