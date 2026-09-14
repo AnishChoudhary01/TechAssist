@@ -12,7 +12,7 @@ one interface.
 
 All five exercises are implemented:
 
-1. FastAPI application with Ollama + Qwen2.5-Coder generation.
+1. FastAPI application with Ollama + a lightweight local LLM generation.
 2. Document loading, overlap chunking, Ollama embeddings, and persistent ChromaDB.
 3. RAG query embedding, vector similarity search, context retrieval, and grounded generation.
 4. Separate API/Application, RAG, and LLM services coordinated by an orchestrator.
@@ -90,9 +90,11 @@ updates it rather than inserting an additional copy.
 
 ## Use the public API
 
-Open the TechAssist UI at `http://127.0.0.1:8000/`. It is the recommended way to
-ask questions and inspect the end-to-end processing trace. The interactive API
-documentation remains available at `http://127.0.0.1:8000/docs`, or call:
+Open the TechAssist UI at `http://127.0.0.1:8000/`. Use its Knowledge base panel
+to upload a `.txt`, `.md`, or text-based `.pdf` directly; it is chunked, embedded,
+and added to ChromaDB immediately. The same UI lets you ask questions and inspect
+the end-to-end processing trace. The interactive API documentation remains
+available at `http://127.0.0.1:8000/docs`, or call:
 
 ```powershell
 Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/support/ask" `
@@ -136,3 +138,32 @@ and Ollama models persist in named Docker volumes.
 ```powershell
 .\.venv\Scripts\python -m pytest -q
 ```
+
+## Evaluate compact local models
+
+The Evaluation section in the UI runs a fixed set of 24 technical-support,
+configuration, FAQ, RAG, and code-generation tasks against exactly three
+configured models. Every model receives the same questions, one shared RAG
+retrieval per question, the production prompt, and the same generation settings.
+It persists raw answers and a comparison with correctness/relevance proxies,
+retrieval quality, hallucination proxy rate, code test-pass rate, latency, token
+usage, CPU, memory, and Ollama-reported VRAM. The same Evaluation page also
+includes a **RAG Analysis** dashboard for selected questions: it presents
+question → retrieved chunks → each model response, labels relevant and
+irrelevant chunks, lists important expected information missed by retrieval, and
+flags tracked hallucinations despite the supplied context.
+
+Open `http://127.0.0.1:8000/`, choose **Evaluation** in the sidebar, and select
+**Run evaluation**. The non-blocking run may take several minutes on CPU-only
+hardware. Alternatively, start Ollama and the RAG service, then run:
+
+```powershell
+.\.venv\Scripts\python .\evaluation\evaluate_models.py `
+  --output .\evaluation\results\model_comparison.json
+```
+
+Results are saved to `evaluation/results/latest.json`. See
+`evaluation/MODEL_COMPARISON.md` for the scoring rubric and controlled
+conditions. The quality metrics are transparent deterministic proxies, not an
+LLM-as-a-judge score; the raw report retains every answer and retrieved chunk for
+review.
