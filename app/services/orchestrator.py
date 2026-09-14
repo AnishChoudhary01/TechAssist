@@ -6,7 +6,7 @@ from typing import Protocol
 import httpx
 
 from app.core.config import Settings
-from app.models.knowledge import RetrievedChunk, RetrievalResponse
+from app.models.knowledge import IngestionResult, RetrievedChunk, RetrievalResponse
 from app.models.llm import GenerationResponse
 from app.models.support import ProcessingStep
 
@@ -32,7 +32,7 @@ class ContextRetriever(Protocol):
 
 
 class ResponseGenerator(Protocol):
-    async def generate(self, prompt: str, system_prompt: str) -> tuple[str, str]: ...
+    async def generate(self, prompt: str, system_prompt: str, model: str | None = None) -> tuple[str, str]: ...
 
 
 class RAGServiceClient:
@@ -62,20 +62,48 @@ class RAGServiceClient:
         except ValueError as error:
             raise UpstreamServiceError("RAG service", f"returned an invalid payload: {error}") from error
 
+    async def upload_document(
+        self,
+        filename: str,
+        content: bytes,
+        content_type: str | None,
+        category: str | None,
+    ) -> IngestionResult:
+        """Send one document to the RAG service for chunking and indexing."""
+        try:
+            form_data = {"category": category} if category else None
+            async with httpx.AsyncClient(timeout=self._timeout, trust_env=False) as client:
+                response = await client.post(
+                    f"{self._base_url}/v1/knowledge/documents",
+                    data=form_data,
+                    files={"file": (filename, content, content_type or "application/octet-stream")},
+                )
+                response.raise_for_status()
+            return IngestionResult.model_validate(response.json())
+        except httpx.HTTPStatusError as error:
+            raise UpstreamServiceError(
+                "RAG service",
+                f"returned HTTP {error.response.status_code}: {_response_detail(error.response)}",
+            ) from error
+        except httpx.RequestError as error:
+            raise UpstreamServiceError("RAG service", f"connection failed: {error}") from error
+        except ValueError as error:
+            raise UpstreamServiceError("RAG service", f"returned an invalid payload: {error}") from error
+
 
 class LLMServiceClient:
-    """HTTP client for the independent Code Llama service."""
+    """HTTP client for the independent Ollama-backed LLM service."""
 
     def __init__(self, settings: Settings) -> None:
         self._base_url = settings.llm_service_url
         self._timeout = settings.ollama_timeout_seconds
 
-    async def generate(self, prompt: str, system_prompt: str) -> tuple[str, str]:
+    async def generate(self, prompt: str, system_prompt: str, model: str | None = None) -> tuple[str, str]:
         try:
             async with httpx.AsyncClient(timeout=self._timeout, trust_env=False) as client:
                 response = await client.post(
                     f"{self._base_url}/v1/generate",
-                    json={"prompt": prompt, "system_prompt": system_prompt},
+                    json={"prompt": prompt, "system_prompt": system_prompt, "model": model},
                 )
                 response.raise_for_status()
             parsed = GenerationResponse.model_validate(response.json())
@@ -107,40 +135,81 @@ class TechnicalSupportOrchestrator:
         self._retriever = retriever
         self._generator = generator
 
-    async def answer(self, question: str) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep]]:
-        """Retrieve context, generate an answer, and record the processing trace."""
-        retrieval_started = perf_counter()
-        sources = await self._retriever.retrieve(question)
-        retrieval_duration = int((perf_counter() - retrieval_started) * 1000)
-        context = self._format_context(sources)
-        prompt = (
-            f"Technical support question:\n{question}\n\n"
-            f"Knowledge-base context:\n{context}\n\n"
-            "Provide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next."
-        )
-        generation_started = perf_counter()
-        answer, model = await self._generator.generate(prompt, SYSTEM_PROMPT)
-        generation_duration = int((perf_counter() - generation_started) * 1000)
-        source_labels = sorted({source.source for source in sources})
-        trace = [
-            ProcessingStep(
-                stage="Knowledge base / RAG retrieval",
-                service="RAG service",
-                detail=(
-                    f"Embedded the question and searched ChromaDB; retrieved {len(sources)} relevant chunk(s)"
-                    + (f" from {', '.join(source_labels)}." if source_labels else ".")
+    async def answer(
+        self,
+        question: str,
+        model: str | None = None,
+        use_rag: bool = True,
+    ) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep]]:
+        """Optionally retrieve context, then generate an answer and record the processing trace."""
+        if use_rag:
+            retrieval_started = perf_counter()
+            sources = await self._retriever.retrieve(question)
+            retrieval_duration = int((perf_counter() - retrieval_started) * 1000)
+            context = self._format_context(sources)
+            prompt = (
+                f"Technical support question:\n{question}\n\n"
+                f"Knowledge-base context:\n{context}\n\n"
+                "Provide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next."
+            )
+            source_labels = sorted({source.source for source in sources})
+            retrieval_trace = [
+                ProcessingStep(
+                    stage="Knowledge base / RAG retrieval",
+                    service="RAG service",
+                    detail=(
+                        f"Embedded the question and searched ChromaDB; retrieved {len(sources)} relevant chunk(s)"
+                        + (f" from {', '.join(source_labels)}." if source_labels else ".")
+                    ),
+                    duration_ms=retrieval_duration,
                 ),
-                duration_ms=retrieval_duration,
-            ),
+                ProcessingStep(
+                    stage="Relevant chunks selected",
+                    service="RAG service",
+                    detail=f"{len(sources)} retrieved chunk(s) available as knowledge-base context.",
+                ),
+                ProcessingStep(
+                    stage="Relevant context assembled",
+                    service="API orchestrator",
+                    detail="Added retrieved chunks to the grounded troubleshooting prompt.",
+                ),
+            ]
+        else:
+            sources = []
+            prompt = (
+                f"Technical support question:\n{question}\n\n"
+                "Provide a helpful troubleshooting response in at most 250 words."
+            )
+            retrieval_trace = [
+                ProcessingStep(
+                    stage="Knowledge base / RAG retrieval",
+                    service="API orchestrator",
+                    detail="RAG mode is off. Retrieval was skipped.",
+                ),
+                ProcessingStep(
+                    stage="Relevant chunks selected",
+                    service="API orchestrator",
+                    detail="RAG mode is off. No document chunks were selected.",
+                ),
+                ProcessingStep(
+                    stage="Relevant context assembled",
+                    service="API orchestrator",
+                    detail="RAG mode is off. No retrieved context was added. The LLM will answer the question directly.",
+                ),
+            ]
+
+        generation_started = perf_counter()
+        answer, model = await self._generator.generate(prompt, SYSTEM_PROMPT, model)
+        generation_duration = int((perf_counter() - generation_started) * 1000)
+        trace = [
+            *retrieval_trace,
             ProcessingStep(
-                stage="Relevant context assembled",
-                service="API orchestrator",
-                detail="Added retrieved chunks to the grounded troubleshooting prompt.",
-            ),
-            ProcessingStep(
-                stage="Ollama / Code Llama generation",
+                stage="Ollama / LLM generation",
                 service="LLM service",
-                detail=f"Generated the troubleshooting response with {model} through Ollama.",
+                detail=(
+                    f"Generated the troubleshooting response with {model} through Ollama"
+                    + (" using retrieved context." if use_rag else " directly, without RAG retrieval.")
+                ),
                 duration_ms=generation_duration,
             ),
         ]

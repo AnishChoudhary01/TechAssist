@@ -3,79 +3,101 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TechAssist – AI Technical Support</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>TechAssist – Technical Support</title>
+    <link rel="stylesheet" href="/static/styles.css?v=rag-toggle-2">
   </head>
   <body>
-    <main class="shell">
-      <header class="masthead">
-        <div>
-          <p class="eyebrow">AI technical support assistant</p>
-          <h1>TechAssist</h1>
-          <p class="lede">Ask a question and inspect every step that turns your knowledge base into a troubleshooting response.</p>
+    <div class="app-frame">
+      <aside class="sidebar" aria-label="Workspace navigation">
+        <a class="brand" href="/" aria-label="TechAssist workspace"><span class="brand-logo">✣</span><span><strong>TechAssist</strong><small>Private local AI</small></span></a>
+        <nav class="side-nav" aria-label="Primary navigation">
+          <a class="active" href="#knowledge-base"><span>⌂</span>Workspace</a>
+          <a href="#knowledge-base"><span>▣</span>Documents</a>
+          <a href="#live-trace"><span>◷</span>History</a>
+          <a href="#evaluation"><span>◈</span>Evaluation</a>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="model-status"><span></span><div><strong>Local AI Ready</strong><small>Ollama · Local model</small></div></div>
+          <a href="#answer-card"><span>ⓘ</span>About</a>
         </div>
-        <div class="system-badge" aria-label="RAG and Code Llama workflow">RAG + Code Llama</div>
-      </header>
+      </aside>
 
-      <section class="question-panel" aria-labelledby="question-heading">
-        <div class="panel-heading">
-          <div>
-            <p class="section-kicker">Start here</p>
-            <h2 id="question-heading">What do you need help with?</h2>
-          </div>
-          <span id="request-status" class="status" aria-live="polite">Ready</span>
-        </div>
-        <form id="question-form">
-          <label for="question">Technical support question</label>
-          <textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="For example: My application cannot connect to the database after a configuration change. How should I troubleshoot it?"></textarea>
-          <div class="form-footer">
-            <span id="question-count">0 / 4000</span>
-            <button id="submit-button" type="submit">Analyze question</button>
-          </div>
-        </form>
-        <p id="error-message" class="error" role="alert" hidden></p>
-      </section>
+      <main class="workspace">
+        <header class="workspace-header">
+          <div><h1>Upload. Ask. <span>Understand.</span></h1><p>Build answers from your documents, with every retrieval and model step visible.</p></div>
+          <div class="ready-badge"><span></span>Local AI Ready</div>
+        </header>
 
-      <section class="flow-panel" aria-labelledby="flow-heading">
-        <div class="panel-heading">
-          <div>
-            <p class="section-kicker">Transparent answer generation</p>
-            <h2 id="flow-heading">Processing flow</h2>
-          </div>
-          <span id="flow-summary" class="muted">Submit a question to begin.</span>
-        </div>
-        <ol id="flow" class="flow-list" aria-live="polite">
-          <li data-stage="User question received"><span class="step-number">1</span><div><strong>User question</strong><small>Waiting for input</small></div></li>
-          <li data-stage="Knowledge base / RAG retrieval"><span class="step-number">2</span><div><strong>API → RAG</strong><small>Query embedding and ChromaDB similarity search</small></div></li>
-          <li data-stage="Relevant context assembled"><span class="step-number">3</span><div><strong>Relevant context</strong><small>Retrieved chunks added to the prompt</small></div></li>
-          <li data-stage="Ollama / Code Llama generation"><span class="step-number">4</span><div><strong>Ollama → Code Llama</strong><small>Grounded answer generation</small></div></li>
-          <li data-stage="Final response returned"><span class="step-number">5</span><div><strong>Final response</strong><small>Waiting for an answer</small></div></li>
-        </ol>
-      </section>
+        <section class="workflow">
+          <article id="knowledge-base" class="workflow-card knowledge-card" aria-labelledby="knowledge-heading">
+            <div class="step-marker">1</div>
+            <div class="card-head"><div><h2 id="knowledge-heading">Knowledge Base</h2><p>Upload and index your technical documents first.</p></div><div class="card-actions"><label class="sr-only" for="document-category">Category</label><input id="document-category" name="category" form="upload-form" type="text" maxlength="100" placeholder="Category (optional)"><button id="upload-button" class="button" form="upload-form" type="submit">Index document <span>›</span></button></div></div>
+            <form id="upload-form" class="knowledge-content">
+              <label id="drop-zone" class="drop-zone" for="document-file"><span class="upload-symbol">☁</span><strong id="file-label">Drag &amp; drop files here</strong><em>or browse</em><small>PDF, Markdown, TXT up to 50 MB</small><input id="document-file" name="file" type="file" accept=".pdf,.md,.txt,application/pdf,text/markdown,text/plain" required></label>
+              <section class="document-list" aria-labelledby="documents-heading"><div class="list-heading"><h3 id="documents-heading">Indexed documents <span id="document-count">(0)</span></h3><span id="knowledge-state" class="index-state">Waiting</span></div><div id="indexed-documents" class="indexed-documents"><p class="empty-documents">No documents indexed yet.</p></div></section>
+            </form>
+            <p id="upload-status" class="notice" aria-live="polite" hidden></p>
+          </article>
 
-      <section id="result-panel" class="results" aria-labelledby="result-heading" hidden>
-        <div class="panel-heading">
-          <div>
-            <p class="section-kicker">Generated answer</p>
-            <h2 id="result-heading">Troubleshooting response</h2>
-          </div>
-          <div id="response-meta" class="response-meta"></div>
-        </div>
-        <article id="answer" class="answer" aria-live="polite"></article>
+          <article class="workflow-card ask-card" aria-labelledby="ask-heading">
+            <div class="step-marker">2</div>
+            <div class="card-head"><div><h2 id="ask-heading">Ask</h2><p id="ask-guidance">Ask a technical question. With Use RAG on, answers are grounded in retrieved documents.</p></div><div class="ask-actions"><label class="rag-toggle" for="rag-toggle"><input id="rag-toggle" type="checkbox" checked><span>Use RAG</span></label><label class="model-picker" for="model-select"><span>Model</span><select id="model-select" name="model" form="question-form" aria-label="Local language model"><option value="qwen2.5-coder:0.5b-instruct">Qwen2.5-Coder 0.5B</option></select></label><button id="submit-button" class="button" form="question-form" type="submit">Analyze issue <span>›</span></button></div></div>
+            <form id="question-form"><label class="sr-only" for="question">Technical support question</label><textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="Type your technical support question here..."></textarea><div class="question-footer"><span id="question-count">0 / 4000</span><span id="request-status" class="request-status" aria-live="polite">Ready</span></div></form>
+            <p id="error-message" class="notice notice-error" role="alert" hidden></p>
+          </article>
 
-        <div class="detail-grid">
-          <section class="detail-panel" aria-labelledby="context-heading">
-            <h3 id="context-heading">Retrieved context</h3>
-            <p id="context-summary" class="muted"></p>
-            <div id="sources" class="sources"></div>
-          </section>
-          <section class="detail-panel" aria-labelledby="llm-heading">
-            <h3 id="llm-heading">LLM information</h3>
+          <article id="live-trace" class="workflow-card trace-card" aria-labelledby="trace-heading">
+            <div class="step-marker">3</div>
+            <div class="card-head"><div><h2 id="trace-heading">Live System Trace</h2><p id="flow-summary">See every TechAssist step used to build the answer.</p></div><span class="chevron">⌃</span></div>
+            <ol id="flow" class="trace-flow" aria-live="polite">
+              <li data-stage="User question received"><span class="trace-icon">?</span><div><strong>Question received</strong><small>Waiting...</small></div></li>
+              <li data-stage="Knowledge base / RAG retrieval"><span class="trace-icon">▣</span><div><strong>Retrieving documents</strong><small>Waiting...</small></div></li>
+              <li data-stage="Relevant chunks selected"><span class="trace-icon">◫</span><div><strong>Relevant chunks</strong><small>Waiting...</small></div></li>
+              <li data-stage="Relevant context assembled"><span class="trace-icon">▤</span><div><strong>Context assembled</strong><small>Waiting...</small></div></li>
+              <li data-stage="Ollama / LLM generation"><span class="trace-icon">✦</span><div><strong>Generating answer</strong><small>Waiting...</small></div></li>
+              <li data-stage="Final response returned"><span class="trace-icon">✓</span><div><strong>Answer ready</strong><small>Waiting...</small></div></li>
+            </ol>
+          </article>
+
+          <article id="answer-card" class="workflow-card analysis-card is-empty" aria-labelledby="analysis-heading">
+            <div class="step-marker">4</div>
+            <div class="card-head"><div><h2 id="analysis-heading">AI Analysis</h2><p id="analysis-guidance">Answer with sources, grounded in your documents.</p></div><div id="response-meta" class="response-meta"></div></div>
+            <div class="analysis-layout">
+              <section class="answer-zone"><div id="answer-empty" class="answer-empty"><span>✦</span><div><strong>Your answer will appear here</strong><p>Upload documents and ask a question to get started.</p></div></div><article id="answer" class="answer" aria-live="polite"></article></section>
+              <section class="sources-zone" aria-labelledby="sources-heading"><div class="source-tabs"><strong id="sources-heading">Sources</strong><span id="sources-mode">Relevant chunks</span></div><p id="context-summary" class="source-summary">No sources yet</p><div id="sources" class="sources"></div></section>
+            </div>
             <dl id="llm-info" class="llm-info"></dl>
-          </section>
-        </div>
-      </section>
-    </main>
-    <script src="/static/app.js"></script>
+          </article>
+
+          <article id="evaluation" class="workflow-card evaluation-card" aria-labelledby="evaluation-heading">
+            <div class="step-marker">5</div>
+            <div class="card-head"><div><h2 id="evaluation-heading">LLM Evaluation</h2><p>Compare three local models on the same 24 technical-support and RAG tasks.</p></div><button id="run-evaluation" class="button" type="button">Run evaluation <span>›</span></button></div>
+            <div class="evaluation-controls"><div><strong>Models to compare</strong><div id="evaluation-models" class="evaluation-models" aria-label="Models included in evaluation"></div></div><p id="evaluation-status" class="request-status" aria-live="polite">Load a saved evaluation or run a new comparison.</p></div>
+            <details class="evaluation-method" open>
+              <summary>Exercise 3 · how each metric is calculated</summary>
+              <div id="evaluation-metric-definitions" class="evaluation-metric-definitions">
+                <p><strong>Quality</strong></p>
+                <ul>
+                  <li><strong>Correctness / Accuracy</strong> — 100 × (gold expected_terms found in the answer) / |expected_terms|, then averaged over 24 questions.</li>
+                  <li><strong>Relevance</strong> — mean of expected-term coverage and question-token coverage of the answer.</li>
+                  <li><strong>Retrieval Quality</strong> — 100 × (retrieval_terms found in the frozen top-4 RAG context) / |retrieval_terms|. Same context for every model.</li>
+                  <li><strong>Hallucination Rate</strong> — unsupported commands (chkdsk, sfc, msconfig, diskpart, regedit, wget, curl) in the answer but not in context, divided by sentence count. Lower is better.</li>
+                  <li><strong>Test-Pass Rate</strong> — executable check of <code>is_valid_port</code> on 1, 65535, 0, 65536, "80", and True. Non-code questions are excluded.</li>
+                </ul>
+                <p><strong>Performance</strong></p>
+                <ul>
+                  <li><strong>Response Latency</strong> — wall-clock ms around Ollama <code>/api/generate</code>, averaged per model (temperature 0.2, seed 42, 256 tokens).</li>
+                  <li><strong>Token Usage</strong> — Ollama <code>prompt_eval_count</code> / <code>eval_count</code>, shown as mean prompt / mean completion tokens.</li>
+                  <li><strong>CPU / Memory / GPU</strong> — CPU is Δ Ollama process CPU seconds / wall time when visible; memory is Ollama <code>/api/ps</code> loaded size; GPU is <code>size_vram</code> (0 on CPU-only hosts).</li>
+                </ul>
+              </div>
+            </details>
+            <div id="evaluation-empty" class="evaluation-empty">No completed evaluation yet. Run evaluation to fill the comparison table for all three models on the same 24 tasks.</div>
+            <div id="evaluation-results" class="evaluation-results" hidden><div class="evaluation-summary"><span id="evaluation-question-count"></span><span id="evaluation-generated-at"></span><span>Quantitative quality + performance · formulas above</span></div><div id="evaluation-comparison" class="evaluation-comparison"></div><p class="evaluation-note">Each cell is a mean over the fixed task set. Raw answers, frozen RAG context, tokens, and resource samples are saved in evaluation/results/latest.json.</p></div>
+          </article>
+        </section>
+      </main>
+    </div>
+    <script src="/static/app.js?v=rag-toggle-2"></script>
   </body>
 </html>

@@ -13,6 +13,18 @@ class SupportQuestion(BaseModel):
         max_length=4_000,
         examples=["My Python application fails with ModuleNotFoundError. How should I troubleshoot it?"],
     )
+    model: str | None = Field(default=None, min_length=1, max_length=200)
+    use_rag: bool = Field(
+        default=True,
+        description="When true, retrieve knowledge-base chunks before generation. When false, the LLM answers the question directly.",
+    )
+
+
+class ModelOptionsResponse(BaseModel):
+    """Local models the UI is permitted to choose from."""
+
+    default_model: str
+    models: list[str]
 
 
 class SupportResponse(BaseModel):
@@ -20,6 +32,7 @@ class SupportResponse(BaseModel):
 
     answer: str
     model: str
+    use_rag: bool = True
     sources: list[RetrievedChunk] = Field(default_factory=list)
     processing_trace: list["ProcessingStep"] = Field(default_factory=list)
 
