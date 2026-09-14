@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
 from datetime import UTC, datetime
 import json
 from pathlib import Path
@@ -21,19 +22,127 @@ except ImportError:  # pragma: no cover - exercised only without optional packag
 
 
 ROOT = Path(__file__).resolve().parents[2]
-QUESTIONS_FILE = ROOT / "evaluation" / "questions.json"
+PACKAGE_ROOT = Path(__file__).resolve().parents[1]
+QUESTIONS_CANDIDATES = (
+    ROOT / "evaluation" / "questions.json",
+    PACKAGE_ROOT / "evaluation" / "questions.json",
+)
 RESULTS_FILE = ROOT / "evaluation" / "results" / "latest.json"
 TOP_K = 4
 TEMPERATURE = 0.2
 SEED = 42
 NUM_PREDICT = 256
 SUSPICIOUS_COMMANDS = ("chkdsk", "sfc /scannow", "msconfig", "diskpart", "regedit", "wget", "curl")
-RAG_ANALYSIS_IDS = ("battery-low", "supervisor-password", "windows-recovery", "wireless-connection", "factory-reset", "rag-source-check")
+ProgressCallback = Callable[[int, int], None]
+
+METRIC_DEFINITIONS = [
+    {
+        "id": "accuracy_percent",
+        "name": "Correctness / Accuracy",
+        "group": "quality",
+        "formula": (
+            "For each question, count how many gold expected_terms appear in the model answer "
+            "(case-insensitive substring match). Accuracy = 100 × matched_terms / |expected_terms|. "
+            "The table value is the mean over all 24 questions. This is a transparent lexical proxy, not an LLM-as-judge score."
+        ),
+    },
+    {
+        "id": "relevance_percent",
+        "name": "Relevance",
+        "group": "quality",
+        "formula": (
+            "Mean of (a) expected-term coverage of the answer and (b) coverage of the question's own whitespace-split tokens in the answer. "
+            "Relevance = (accuracy_proxy + question-token coverage) / 2. Higher means the answer stays on the asked topic."
+        ),
+    },
+    {
+        "id": "retrieval_quality_percent",
+        "name": "Retrieval Quality",
+        "group": "quality",
+        "formula": (
+            "Each question is retrieved once (top_k=4) and the same frozen chunks are given to every model. "
+            "Retrieval quality = 100 × (retrieval_terms found in that context) / |retrieval_terms|. "
+            "This scores the retriever, not the LLM, so it is identical across models for a given question."
+        ),
+    },
+    {
+        "id": "hallucination_rate_percent",
+        "name": "Hallucination Rate",
+        "group": "quality",
+        "formula": (
+            "Count unsupported operational commands (chkdsk, sfc /scannow, msconfig, diskpart, regedit, wget, curl) "
+            "that appear in the answer but not in the retrieved context. "
+            "Rate = min(100, 100 × unsupported_commands / max(1, sentence_count)). Lower is better."
+        ),
+    },
+    {
+        "id": "test_pass_rate_percent",
+        "name": "Test-Pass Rate (generated code)",
+        "group": "quality",
+        "formula": (
+            "Applies only to the is_valid_port code-generation task. The answer is parsed with ast, restricted to a safe node set, executed, "
+            "and checked on (1→True, 65535→True, 0→False, 65536→False, '80'→False, True→False). "
+            "Rate = 100 × passed / code_tasks. Non-code questions are excluded."
+        ),
+    },
+    {
+        "id": "latency_ms",
+        "name": "Response Latency",
+        "group": "performance",
+        "formula": (
+            "Wall-clock milliseconds around the Ollama /api/generate call (time.perf_counter), then averaged per model. "
+            "Every model uses the same frozen prompt, temperature 0.2, seed 42, and num_predict 256."
+        ),
+    },
+    {
+        "id": "token_usage",
+        "name": "Token Usage",
+        "group": "performance",
+        "formula": (
+            "Prompt tokens = Ollama prompt_eval_count. Completion tokens = Ollama eval_count. "
+            "The table shows mean prompt tokens / mean completion tokens for that model."
+        ),
+    },
+    {
+        "id": "cpu_percent",
+        "name": "CPU Consumption",
+        "group": "performance",
+        "formula": (
+            "When an Ollama process is visible on the same host: 100 × (Δ user+system CPU seconds) / wall-clock generation seconds, then averaged. "
+            "In Docker this can be unavailable because Ollama runs in a separate container."
+        ),
+    },
+    {
+        "id": "memory_mb",
+        "name": "Memory Consumption",
+        "group": "performance",
+        "formula": (
+            "Primary: Ollama /api/ps `size` for the loaded model, converted to MB (works across containers). "
+            "Fallback: psutil RSS of local Ollama processes. Values are averaged per model."
+        ),
+    },
+    {
+        "id": "gpu_memory_mb",
+        "name": "GPU Memory Consumption",
+        "group": "performance",
+        "formula": "Ollama /api/ps `size_vram` in MB for the loaded model. CPU-only hosts report 0.",
+    },
+]
+
+
+def questions_file() -> Path:
+    """Return the packaged 24-question set, whether running from git or Docker."""
+    for candidate in QUESTIONS_CANDIDATES:
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(
+        "Evaluation questions.json was not included in this image. Rebuild with the evaluation directory."
+    )
 
 
 def load_questions() -> list[dict[str, Any]]:
     """Return the fixed, versioned evaluation set used by every model."""
-    return json.loads(QUESTIONS_FILE.read_text(encoding="utf-8"))
+    return json.loads(questions_file().read_text(encoding="utf-8"))
 
 
 def format_context(results: list[dict[str, Any]]) -> str:
@@ -68,54 +177,10 @@ def _term_coverage(text: str, terms: list[str]) -> float:
 
 def _hallucination_rate(answer: str, context: str) -> float:
     """Return an auditable conservative proxy, not an LLM-judge claim of fact."""
-    unsupported = _unsupported_commands(answer, context)
+    lowered_answer, lowered_context = answer.lower(), context.lower()
+    unsupported = [command for command in SUSPICIOUS_COMMANDS if command in lowered_answer and command not in lowered_context]
     sentences = max(1, len(re.findall(r"[.!?]+", answer)))
     return round(min(100, 100 * len(unsupported) / sentences), 1)
-
-
-def _unsupported_commands(answer: str, context: str) -> list[str]:
-    """List tracked commands that were generated without RAG support."""
-    lowered_answer, lowered_context = answer.lower(), context.lower()
-    return [command for command in SUSPICIOUS_COMMANDS if command in lowered_answer and command not in lowered_context]
-
-
-def _rag_analysis(results: list[dict[str, Any]], models: list[str]) -> list[dict[str, Any]]:
-    """Build reviewable retrieval-to-response records for selected evaluation tasks."""
-    analyses: list[dict[str, Any]] = []
-    for item in results:
-        if item["id"] not in RAG_ANALYSIS_IDS:
-            continue
-        retrieval_terms = item.get("retrieval_terms", [])
-        expected_terms = item["expected_terms"]
-        context = format_context(item["retrieved_context"])
-        chunks = []
-        for chunk in item["retrieved_context"]:
-            matched_terms = [term for term in retrieval_terms if term.lower() in chunk["content"].lower()]
-            chunks.append({
-                "source": chunk["source"], "page": chunk.get("page"), "content": chunk["content"],
-                "classification": "relevant" if matched_terms else "irrelevant",
-                "relevant_information": matched_terms,
-            })
-        irrelevant_count = sum(chunk["classification"] == "irrelevant" for chunk in chunks)
-        retrieval_quality = _term_coverage(context, retrieval_terms)
-        context_quality = round((retrieval_quality + _percent(len(chunks) - irrelevant_count, len(chunks))) / 2, 1)
-        model_reviews = []
-        for model in models:
-            answer = item["answers"][model]
-            correct_information = [term for term in expected_terms if term.lower() in answer["answer"].lower()]
-            unsupported = _unsupported_commands(answer["answer"], context)
-            response_quality = round((answer["metrics"]["accuracy_percent"] + answer["metrics"]["relevance_percent"] + (100 - answer["metrics"]["hallucination_rate_percent"])) / 3, 1)
-            model_reviews.append({
-                "model": model, "response": answer["answer"], "correct_response_information": correct_information,
-                "hallucination_despite_context": unsupported, "response_quality_percent": response_quality,
-            })
-        analyses.append({
-            "id": item["id"], "question": item["question"], "retrieval_quality_percent": retrieval_quality,
-            "context_quality_percent": context_quality, "retrieved_context": chunks,
-            "important_information_missed": [term for term in expected_terms if term.lower() not in context.lower()],
-            "model_reviews": model_reviews,
-        })
-    return analyses
 
 
 def _code_test(answer: str) -> bool | None:
@@ -166,13 +231,19 @@ def _resource_snapshot() -> tuple[float | None, int | None]:
     return cpu_seconds, memory_bytes
 
 
-async def _gpu_memory_mb(client: httpx.AsyncClient, model: str) -> float | None:
+async def _ollama_loaded_resources(client: httpx.AsyncClient, model: str) -> tuple[float | None, float | None]:
+    """Return (loaded size MB, VRAM MB) from Ollama /api/ps for the named model."""
     try:
         models = (await client.get("/api/ps")).json().get("models", [])
-        entry = next((item for item in models if item.get("name") == model), None)
-        return round(entry.get("size_vram", 0) / (1024 * 1024), 1) if entry else 0.0
-    except (httpx.HTTPError, ValueError, TypeError):
-        return None
+        entry = next((item for item in models if model in {item.get("name"), item.get("model")}), None)
+        if entry is None:
+            return None, 0.0
+        return (
+            round(entry.get("size", 0) / (1024 * 1024), 1),
+            round(entry.get("size_vram", 0) / (1024 * 1024), 1),
+        )
+    except (httpx.HTTPError, ValueError, TypeError, KeyError):
+        return None, None
 
 
 async def _retrieve_all(client: httpx.AsyncClient, questions: list[dict[str, Any]], rag_url: str) -> list[dict[str, Any]]:
@@ -201,6 +272,8 @@ async def _generate(client: httpx.AsyncClient, model: str, item: dict[str, Any])
     payload = response.json()
     answer = payload["response"].strip()
     after_cpu, after_memory = _resource_snapshot()
+    loaded_mb, vram_mb = await _ollama_loaded_resources(client, model)
+    psutil_memory_mb = round((after_memory or 0) / (1024 * 1024), 1) if after_memory is not None else None
     context = format_context(item["retrieved_context"])
     test_passed = _code_test(answer) if item.get("code_test") else None
     return {
@@ -208,9 +281,9 @@ async def _generate(client: httpx.AsyncClient, model: str, item: dict[str, Any])
         "latency_ms": round(elapsed * 1000),
         "token_usage": {"prompt": payload.get("prompt_eval_count", 0), "completion": payload.get("eval_count", 0)},
         "resource_usage": {
-            "cpu_percent": round((after_cpu - before_cpu) / elapsed * 100, 1) if before_cpu is not None and after_cpu is not None else None,
-            "memory_mb": round((after_memory or 0) / (1024 * 1024), 1) if after_memory is not None else None,
-            "gpu_memory_mb": await _gpu_memory_mb(client, model),
+            "cpu_percent": round((after_cpu - before_cpu) / elapsed * 100, 1) if before_cpu is not None and after_cpu is not None and elapsed else None,
+            "memory_mb": loaded_mb if loaded_mb is not None else psutil_memory_mb,
+            "gpu_memory_mb": vram_mb,
         },
         "metrics": {
             "accuracy_percent": _term_coverage(answer, item["expected_terms"]),
@@ -249,7 +322,12 @@ def _aggregate(results: list[dict[str, Any]], models: list[str]) -> list[dict[st
     return comparison
 
 
-async def run_evaluation(models: list[str], rag_url: str, ollama_url: str) -> dict[str, Any]:
+async def run_evaluation(
+    models: list[str],
+    rag_url: str,
+    ollama_url: str,
+    on_progress: ProgressCallback | None = None,
+) -> dict[str, Any]:
     """Run all fixed questions against every selected model under shared conditions."""
     questions = load_questions()
     timeout = httpx.Timeout(600.0)
@@ -257,23 +335,27 @@ async def run_evaluation(models: list[str], rag_url: str, ollama_url: str) -> di
         prepared = await _retrieve_all(rag_client, questions, rag_url)
     results: list[dict[str, Any]] = []
     async with httpx.AsyncClient(base_url=ollama_url.rstrip("/"), timeout=timeout, trust_env=False) as ollama_client:
-        for item in prepared:
+        for index, item in enumerate(prepared, start=1):
             answers = {model: await _generate(ollama_client, model, item) for model in models}
             results.append({key: value for key, value in item.items() if key != "prompt"} | {"answers": answers})
+            if on_progress is not None:
+                on_progress(index, len(prepared))
     report = {
-        "generated_at_utc": datetime.now(UTC).isoformat(), "models": models, "question_count": len(questions),
-        "conditions": {"shared_questions": True, "retrieved_once_per_question": True, "top_k": TOP_K, "temperature": TEMPERATURE, "seed": SEED, "num_predict": NUM_PREDICT},
-        "metric_notes": {"accuracy_relevance": "Expected-term coverage proxy", "retrieval_quality": "Expected retrieval-term coverage proxy", "hallucination_rate": "Unsupported-command sentence proxy", "resource_usage": "Host Ollama process RSS/CPU delta and Ollama-reported VRAM"},
+        "generated_at_utc": datetime.now(UTC).isoformat(),
+        "models": models,
+        "question_count": len(questions),
+        "conditions": {
+            "shared_questions": True,
+            "retrieved_once_per_question": True,
+            "top_k": TOP_K,
+            "temperature": TEMPERATURE,
+            "seed": SEED,
+            "num_predict": NUM_PREDICT,
+        },
+        "metrics": METRIC_DEFINITIONS,
         "results": results,
     }
     report["comparison"] = _aggregate(results, models)
-    report["rag_analysis"] = _rag_analysis(results, models)
-    report["rag_analysis_notes"] = {
-        "retrieval_quality": "Expected retrieval-term coverage in all retrieved chunks.",
-        "context_quality": "Retrieval quality combined with the percentage of chunks classified relevant.",
-        "response_quality": "Average of answer accuracy proxy, relevance proxy, and inverse unsupported-command rate.",
-        "review_labels": "Relevant/irrelevant chunks and correct response information use fixed expected terms; hallucination flags only tracked unsupported commands.",
-    }
     RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
     RESULTS_FILE.write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report

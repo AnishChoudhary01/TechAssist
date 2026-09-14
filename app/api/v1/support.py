@@ -41,7 +41,7 @@ async def ask_support_question(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="The selected model is not available.")
     started = perf_counter()
     try:
-        answer, model, sources, trace = await service.answer(question.question, question.model)
+        answer, model, sources, trace = await service.answer(question.question, question.model, question.use_rag)
     except UpstreamServiceError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -49,9 +49,15 @@ async def ask_support_question(
         ) from error
 
     total_duration = int((perf_counter() - started) * 1000)
+    final_detail = (
+        "Returned the grounded troubleshooting answer and its retrieved sources to the user."
+        if question.use_rag
+        else "Returned the direct LLM answer. Retrieval was not used."
+    )
     return SupportResponse(
         answer=answer,
         model=model,
+        use_rag=question.use_rag,
         sources=sources,
         processing_trace=[
             ProcessingStep(
@@ -63,7 +69,7 @@ async def ask_support_question(
             ProcessingStep(
                 stage="Final response returned",
                 service="API service",
-                detail="Returned the grounded troubleshooting answer and its retrieved sources to the user.",
+                detail=final_detail,
                 duration_ms=total_duration,
             ),
         ],

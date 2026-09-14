@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.config import Settings, get_settings
 from app.models.evaluation import EvaluationRunRequest, EvaluationRunStarted, EvaluationStatus
-from app.services.evaluation import latest_results, load_questions, run_evaluation
+from app.services.evaluation import METRIC_DEFINITIONS, latest_results, load_questions, run_evaluation
 
 
 router = APIRouter(prefix="/evaluation", tags=["LLM evaluation"])
@@ -18,14 +18,22 @@ router = APIRouter(prefix="/evaluation", tags=["LLM evaluation"])
 class _RunState:
     status: str = "running"
     detail: str | None = None
+    completed_questions: int = 0
+    total_questions: int = 24
 
 
 _runs: dict[str, _RunState] = {}
 
 
 async def _run_in_background(run_id: str, models: list[str], settings: Settings) -> None:
+    def on_progress(completed: int, total: int) -> None:
+        state = _runs.get(run_id)
+        if state is not None:
+            state.completed_questions = completed
+            state.total_questions = total
+
     try:
-        await run_evaluation(models, settings.rag_service_url, settings.ollama_base_url)
+        await run_evaluation(models, settings.rag_service_url, settings.ollama_base_url, on_progress=on_progress)
         _runs[run_id].status = "completed"
     except Exception as error:  # Keep a useful error in the UI while preserving server availability.
         _runs[run_id].status = "failed"
@@ -34,9 +42,9 @@ async def _run_in_background(run_id: str, models: list[str], settings: Settings)
 
 @router.get("/questions")
 async def evaluation_questions() -> dict[str, object]:
-    """Expose the fixed task set for transparent evaluation conditions."""
+    """Expose the fixed task set and Exercise 3 metric definitions."""
     questions = load_questions()
-    return {"count": len(questions), "questions": questions}
+    return {"count": len(questions), "questions": questions, "metrics": METRIC_DEFINITIONS}
 
 
 @router.get("/latest")
@@ -56,10 +64,14 @@ async def start_evaluation(
     """Start a non-blocking three-model run against all fixed questions."""
     if len(set(request.models)) != 3 or any(model not in settings.ollama_models for model in request.models):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Select three distinct configured local models.")
+    try:
+        question_count = len(load_questions())
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(error)) from error
     run_id = str(uuid4())
-    _runs[run_id] = _RunState()
+    _runs[run_id] = _RunState(total_questions=question_count)
     asyncio.create_task(_run_in_background(run_id, request.models, settings))
-    return EvaluationRunStarted(run_id=run_id, status="running", question_count=len(load_questions()))
+    return EvaluationRunStarted(run_id=run_id, status="running", question_count=question_count)
 
 
 @router.get("/status/{run_id}", response_model=EvaluationStatus)
@@ -68,4 +80,10 @@ async def evaluation_status(run_id: str) -> EvaluationStatus:
     state = _runs.get(run_id)
     if state is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evaluation run was not found.")
-    return EvaluationStatus(run_id=run_id, status=state.status, detail=state.detail)
+    return EvaluationStatus(
+        run_id=run_id,
+        status=state.status,
+        completed_questions=state.completed_questions,
+        total_questions=state.total_questions,
+        detail=state.detail,
+    )

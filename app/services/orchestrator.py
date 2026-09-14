@@ -135,40 +135,81 @@ class TechnicalSupportOrchestrator:
         self._retriever = retriever
         self._generator = generator
 
-    async def answer(self, question: str, model: str | None = None) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep]]:
-        """Retrieve context, generate an answer, and record the processing trace."""
-        retrieval_started = perf_counter()
-        sources = await self._retriever.retrieve(question)
-        retrieval_duration = int((perf_counter() - retrieval_started) * 1000)
-        context = self._format_context(sources)
-        prompt = (
-            f"Technical support question:\n{question}\n\n"
-            f"Knowledge-base context:\n{context}\n\n"
-            "Provide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next."
-        )
+    async def answer(
+        self,
+        question: str,
+        model: str | None = None,
+        use_rag: bool = True,
+    ) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep]]:
+        """Optionally retrieve context, then generate an answer and record the processing trace."""
+        if use_rag:
+            retrieval_started = perf_counter()
+            sources = await self._retriever.retrieve(question)
+            retrieval_duration = int((perf_counter() - retrieval_started) * 1000)
+            context = self._format_context(sources)
+            prompt = (
+                f"Technical support question:\n{question}\n\n"
+                f"Knowledge-base context:\n{context}\n\n"
+                "Provide a helpful troubleshooting response in at most 250 words. If the supplied context is insufficient, say what to check next."
+            )
+            source_labels = sorted({source.source for source in sources})
+            retrieval_trace = [
+                ProcessingStep(
+                    stage="Knowledge base / RAG retrieval",
+                    service="RAG service",
+                    detail=(
+                        f"Embedded the question and searched ChromaDB; retrieved {len(sources)} relevant chunk(s)"
+                        + (f" from {', '.join(source_labels)}." if source_labels else ".")
+                    ),
+                    duration_ms=retrieval_duration,
+                ),
+                ProcessingStep(
+                    stage="Relevant chunks selected",
+                    service="RAG service",
+                    detail=f"{len(sources)} retrieved chunk(s) available as knowledge-base context.",
+                ),
+                ProcessingStep(
+                    stage="Relevant context assembled",
+                    service="API orchestrator",
+                    detail="Added retrieved chunks to the grounded troubleshooting prompt.",
+                ),
+            ]
+        else:
+            sources = []
+            prompt = (
+                f"Technical support question:\n{question}\n\n"
+                "Provide a helpful troubleshooting response in at most 250 words."
+            )
+            retrieval_trace = [
+                ProcessingStep(
+                    stage="Knowledge base / RAG retrieval",
+                    service="API orchestrator",
+                    detail="RAG mode is off. Retrieval was skipped.",
+                ),
+                ProcessingStep(
+                    stage="Relevant chunks selected",
+                    service="API orchestrator",
+                    detail="RAG mode is off. No document chunks were selected.",
+                ),
+                ProcessingStep(
+                    stage="Relevant context assembled",
+                    service="API orchestrator",
+                    detail="RAG mode is off. No retrieved context was added. The LLM will answer the question directly.",
+                ),
+            ]
+
         generation_started = perf_counter()
         answer, model = await self._generator.generate(prompt, SYSTEM_PROMPT, model)
         generation_duration = int((perf_counter() - generation_started) * 1000)
-        source_labels = sorted({source.source for source in sources})
         trace = [
-            ProcessingStep(
-                stage="Knowledge base / RAG retrieval",
-                service="RAG service",
-                detail=(
-                    f"Embedded the question and searched ChromaDB; retrieved {len(sources)} relevant chunk(s)"
-                    + (f" from {', '.join(source_labels)}." if source_labels else ".")
-                ),
-                duration_ms=retrieval_duration,
-            ),
-            ProcessingStep(
-                stage="Relevant context assembled",
-                service="API orchestrator",
-                detail="Added retrieved chunks to the grounded troubleshooting prompt.",
-            ),
+            *retrieval_trace,
             ProcessingStep(
                 stage="Ollama / LLM generation",
                 service="LLM service",
-                detail=f"Generated the troubleshooting response with {model} through Ollama.",
+                detail=(
+                    f"Generated the troubleshooting response with {model} through Ollama"
+                    + (" using retrieved context." if use_rag else " directly, without RAG retrieval.")
+                ),
                 duration_ms=generation_duration,
             ),
         ]

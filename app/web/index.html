@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TechAssist – Technical Support</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css?v=rag-toggle-2">
   </head>
   <body>
     <div class="app-frame">
@@ -41,7 +41,7 @@
 
           <article class="workflow-card ask-card" aria-labelledby="ask-heading">
             <div class="step-marker">2</div>
-            <div class="card-head"><div><h2 id="ask-heading">Ask</h2><p id="ask-guidance">Ask a technical question based on your indexed documents.</p></div><div class="ask-actions"><label class="model-picker" for="model-select"><span>Model</span><select id="model-select" name="model" form="question-form" aria-label="Local language model"><option value="qwen2.5-coder:0.5b-instruct">Qwen2.5-Coder 0.5B</option></select></label><button id="submit-button" class="button" form="question-form" type="submit">Analyze issue <span>›</span></button></div></div>
+            <div class="card-head"><div><h2 id="ask-heading">Ask</h2><p id="ask-guidance">Ask a technical question. With Use RAG on, answers are grounded in retrieved documents.</p></div><div class="ask-actions"><label class="rag-toggle" for="rag-toggle"><input id="rag-toggle" type="checkbox" checked><span>Use RAG</span></label><label class="model-picker" for="model-select"><span>Model</span><select id="model-select" name="model" form="question-form" aria-label="Local language model"><option value="qwen2.5-coder:0.5b-instruct">Qwen2.5-Coder 0.5B</option></select></label><button id="submit-button" class="button" form="question-form" type="submit">Analyze issue <span>›</span></button></div></div>
             <form id="question-form"><label class="sr-only" for="question">Technical support question</label><textarea id="question" name="question" rows="4" minlength="3" maxlength="4000" required placeholder="Type your technical support question here..."></textarea><div class="question-footer"><span id="question-count">0 / 4000</span><span id="request-status" class="request-status" aria-live="polite">Ready</span></div></form>
             <p id="error-message" class="notice notice-error" role="alert" hidden></p>
           </article>
@@ -52,7 +52,7 @@
             <ol id="flow" class="trace-flow" aria-live="polite">
               <li data-stage="User question received"><span class="trace-icon">?</span><div><strong>Question received</strong><small>Waiting...</small></div></li>
               <li data-stage="Knowledge base / RAG retrieval"><span class="trace-icon">▣</span><div><strong>Retrieving documents</strong><small>Waiting...</small></div></li>
-              <li data-stage="Knowledge base / RAG retrieval"><span class="trace-icon">◫</span><div><strong>Relevant chunks</strong><small>Waiting...</small></div></li>
+              <li data-stage="Relevant chunks selected"><span class="trace-icon">◫</span><div><strong>Relevant chunks</strong><small>Waiting...</small></div></li>
               <li data-stage="Relevant context assembled"><span class="trace-icon">▤</span><div><strong>Context assembled</strong><small>Waiting...</small></div></li>
               <li data-stage="Ollama / LLM generation"><span class="trace-icon">✦</span><div><strong>Generating answer</strong><small>Waiting...</small></div></li>
               <li data-stage="Final response returned"><span class="trace-icon">✓</span><div><strong>Answer ready</strong><small>Waiting...</small></div></li>
@@ -61,10 +61,10 @@
 
           <article id="answer-card" class="workflow-card analysis-card is-empty" aria-labelledby="analysis-heading">
             <div class="step-marker">4</div>
-            <div class="card-head"><div><h2 id="analysis-heading">AI Analysis</h2><p>Answer with sources, grounded in your documents.</p></div><div id="response-meta" class="response-meta"></div></div>
+            <div class="card-head"><div><h2 id="analysis-heading">AI Analysis</h2><p id="analysis-guidance">Answer with sources, grounded in your documents.</p></div><div id="response-meta" class="response-meta"></div></div>
             <div class="analysis-layout">
               <section class="answer-zone"><div id="answer-empty" class="answer-empty"><span>✦</span><div><strong>Your answer will appear here</strong><p>Upload documents and ask a question to get started.</p></div></div><article id="answer" class="answer" aria-live="polite"></article></section>
-              <section class="sources-zone" aria-labelledby="sources-heading"><div class="source-tabs"><strong id="sources-heading">Sources</strong><span>Relevant chunks</span></div><p id="context-summary" class="source-summary">No sources yet</p><div id="sources" class="sources"></div></section>
+              <section class="sources-zone" aria-labelledby="sources-heading"><div class="source-tabs"><strong id="sources-heading">Sources</strong><span id="sources-mode">Relevant chunks</span></div><p id="context-summary" class="source-summary">No sources yet</p><div id="sources" class="sources"></div></section>
             </div>
             <dl id="llm-info" class="llm-info"></dl>
           </article>
@@ -73,12 +73,31 @@
             <div class="step-marker">5</div>
             <div class="card-head"><div><h2 id="evaluation-heading">LLM Evaluation</h2><p>Compare three local models on the same 24 technical-support and RAG tasks.</p></div><button id="run-evaluation" class="button" type="button">Run evaluation <span>›</span></button></div>
             <div class="evaluation-controls"><div><strong>Models to compare</strong><div id="evaluation-models" class="evaluation-models" aria-label="Models included in evaluation"></div></div><p id="evaluation-status" class="request-status" aria-live="polite">Load a saved evaluation or run a new comparison.</p></div>
-            <div id="evaluation-empty" class="evaluation-empty">No completed evaluation yet. The run uses the same questions, RAG context, prompt, and decoding settings for all three models.</div>
-            <div id="evaluation-results" class="evaluation-results" hidden><div class="evaluation-summary"><span id="evaluation-question-count"></span><span id="evaluation-generated-at"></span><span>Heuristic quality metrics · transparent methodology</span></div><div id="evaluation-comparison" class="evaluation-comparison"></div><p class="evaluation-note">Accuracy, relevance, retrieval quality, and hallucination rate are deterministic, transparent proxy metrics. Open the raw report for each answer, source context, tokens, and resource sample.</p><section id="rag-analysis" class="rag-analysis" aria-labelledby="rag-analysis-heading"><div class="section-head"><div><h3 id="rag-analysis-heading">RAG Analysis</h3><p>Review how retrieval quality shapes context and each model response.</p></div><span>Retrieval Quality → Context Quality → LLM Response Quality</span></div><div id="rag-analysis-empty" class="evaluation-empty">RAG analysis will appear after a new evaluation run.</div><div id="rag-analysis-content" hidden><div id="rag-analysis-table" class="evaluation-comparison"></div><div id="rag-analysis-cases" class="rag-analysis-cases"></div></div></section></div>
+            <details class="evaluation-method" open>
+              <summary>Exercise 3 · how each metric is calculated</summary>
+              <div id="evaluation-metric-definitions" class="evaluation-metric-definitions">
+                <p><strong>Quality</strong></p>
+                <ul>
+                  <li><strong>Correctness / Accuracy</strong> — 100 × (gold expected_terms found in the answer) / |expected_terms|, then averaged over 24 questions.</li>
+                  <li><strong>Relevance</strong> — mean of expected-term coverage and question-token coverage of the answer.</li>
+                  <li><strong>Retrieval Quality</strong> — 100 × (retrieval_terms found in the frozen top-4 RAG context) / |retrieval_terms|. Same context for every model.</li>
+                  <li><strong>Hallucination Rate</strong> — unsupported commands (chkdsk, sfc, msconfig, diskpart, regedit, wget, curl) in the answer but not in context, divided by sentence count. Lower is better.</li>
+                  <li><strong>Test-Pass Rate</strong> — executable check of <code>is_valid_port</code> on 1, 65535, 0, 65536, "80", and True. Non-code questions are excluded.</li>
+                </ul>
+                <p><strong>Performance</strong></p>
+                <ul>
+                  <li><strong>Response Latency</strong> — wall-clock ms around Ollama <code>/api/generate</code>, averaged per model (temperature 0.2, seed 42, 256 tokens).</li>
+                  <li><strong>Token Usage</strong> — Ollama <code>prompt_eval_count</code> / <code>eval_count</code>, shown as mean prompt / mean completion tokens.</li>
+                  <li><strong>CPU / Memory / GPU</strong> — CPU is Δ Ollama process CPU seconds / wall time when visible; memory is Ollama <code>/api/ps</code> loaded size; GPU is <code>size_vram</code> (0 on CPU-only hosts).</li>
+                </ul>
+              </div>
+            </details>
+            <div id="evaluation-empty" class="evaluation-empty">No completed evaluation yet. Run evaluation to fill the comparison table for all three models on the same 24 tasks.</div>
+            <div id="evaluation-results" class="evaluation-results" hidden><div class="evaluation-summary"><span id="evaluation-question-count"></span><span id="evaluation-generated-at"></span><span>Quantitative quality + performance · formulas above</span></div><div id="evaluation-comparison" class="evaluation-comparison"></div><p class="evaluation-note">Each cell is a mean over the fixed task set. Raw answers, frozen RAG context, tokens, and resource samples are saved in evaluation/results/latest.json.</p></div>
           </article>
         </section>
       </main>
     </div>
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=rag-toggle-2"></script>
   </body>
 </html>

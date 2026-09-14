@@ -1,15 +1,13 @@
 # TechAssist – AI Technical Support Assistant
 
-TechAssist is a technical-support assistant that uses the fast, lightweight
-`qwen2.5-coder:0.5b-instruct` model through Ollama by default. Its UI can also
-switch between configured compact local models.
+TechAssist is a technical-support assistant that uses Qwen2.5-Coder through Ollama.
 It ingests technical manuals, troubleshooting guides, FAQs, error-code documents,
 and installation/configuration guides, retrieves relevant excerpts with RAG, then
 uses them to ground its troubleshooting response.
 
 The public API service also hosts a single browser UI at `http://127.0.0.1:8000/`.
 It displays the complete answer flow—question, API orchestration, RAG retrieval,
-retrieved chunks/context, Ollama/LLM generation, and the final answer—in
+retrieved chunks/context, Ollama/Qwen generation, and the final answer—in
 one interface.
 
 All five exercises are implemented:
@@ -24,7 +22,7 @@ All five exercises are implemented:
 
 ```text
 Client -> API/Application :8000 -> orchestrator -> RAG service :8001 -> ChromaDB + Ollama embeddings
-                                              -> LLM service :8002 -> Ollama Qwen2.5-Coder 0.5B
+                                              -> LLM service :8002 -> Ollama Qwen2.5-Coder
 ```
 
 The API service is the public entry point. It first retrieves relevant indexed
@@ -35,7 +33,7 @@ then calls the LLM service. The RAG and LLM services can scale independently.
 
 - Python 3.11 or newer
 - [Ollama](https://ollama.com/) running locally
-- The Qwen2.5-Coder 0.5B and embedding models pulled into Ollama
+- The Qwen2.5-Coder and embedding models pulled into Ollama
 
 ## Setup
 
@@ -43,9 +41,7 @@ then calls the LLM service. The RAG and LLM services can scale independently.
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-ollama pull qwen2.5-coder:0.5b-instruct
-ollama pull qwen2.5:0.5b
-ollama pull smollm2:360m
+ollama pull qwen2.5-coder:1.5b
 ollama pull nomic-embed-text
 ```
 
@@ -53,9 +49,8 @@ Optional environment variables (shown in `.env.example`):
 
 ```powershell
 $env:OLLAMA_BASE_URL = "http://127.0.0.1:11434"
-$env:OLLAMA_MODEL = "qwen2.5-coder:0.5b-instruct"
-$env:OLLAMA_MODELS = "qwen2.5-coder:0.5b-instruct,qwen2.5:0.5b,smollm2:360m"
-$env:OLLAMA_TIMEOUT_SECONDS = "300"
+$env:OLLAMA_MODEL = "qwen2.5-coder:1.5b"
+$env:OLLAMA_TIMEOUT_SECONDS = "120"
 $env:OLLAMA_NUM_PREDICT = "256"
 $env:OLLAMA_EMBEDDING_MODEL = "nomic-embed-text"
 ```
@@ -112,7 +107,7 @@ Example response:
 ```json
 {
   "answer": "...",
-  "model": "qwen2.5-coder:0.5b-instruct",
+  "model": "qwen2.5-coder:1.5b",
   "sources": [
     {"content": "...", "source": "guide.pdf", "page": 4}
   ]
@@ -130,7 +125,7 @@ Docker Desktop is required. Place documents in `data/knowledge_base/` first, the
 docker compose up --build
 ```
 
-The `ollama-init` service downloads the configured compact models and `nomic-embed-text` on its
+The `ollama-init` service downloads `qwen2.5-coder:1.5b` and `nomic-embed-text` on its
 first run. This can take several minutes. Once it completes, index your mounted
 documents through `http://127.0.0.1:8001/v1/knowledge/index-directory`, then use
 the public API at `http://127.0.0.1:8000/docs`.

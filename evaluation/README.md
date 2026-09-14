@@ -1,28 +1,36 @@
 # Controlled model evaluation
 
 This directory evaluates the unchanged Week 3 TechAssist RAG application with
-three locally installed code models:
+three locally installed models:
 
 - `qwen2.5-coder:0.5b-instruct`
 - `qwen2.5:0.5b`
 - `smollm2:360m`
 
-`evaluate_models.py` retrieves the fixed 24-question set once through the existing RAG
-service, freezes the returned chunks into a prompt, and gives that exact prompt
-to every model. It uses the production system prompt and answer template. The
-only thing that varies is the selected LLM model tag.
+`evaluate_models.py` retrieves the fixed 24-question set once through the RAG
+service, freezes those chunks into a prompt, and gives that exact prompt to
+every model. The production system prompt is unchanged. Only the Ollama model
+tag varies.
+
+## Exercise 3 metrics
+
+Quality: correctness/accuracy, relevance, retrieval quality, hallucination
+rate, and code test-pass rate.
+
+Performance: response latency, token usage, CPU, memory, and GPU VRAM.
+
+Each formula is defined in `MODEL_COMPARISON.md` and in
+`app.services.evaluation.METRIC_DEFINITIONS`. The same definitions are shown
+on the Evaluation card in the UI.
 
 ## Run
 
-Start Ollama and the RAG service, then run from the repository root:
+Start Ollama, RAG, and the API, then either click **Run evaluation** in the UI
+or run from the repository root:
 
-```powershell
-.\.venv\Scripts\python .\evaluation\evaluate_models.py `
-  --output .\evaluation\results\model_comparison.json
+```bash
+python evaluation/evaluate_models.py --output evaluation/results/latest.json
 ```
 
-The JSON output preserves each question, retrieved context, complete prompt,
-answer, correctness/relevance/retrieval and hallucination proxy metrics, code
-test result where applicable, token counts, latency, and resource samples. This
-makes a future evaluation auditable and repeatable. Do not substitute
-model-specific prompts or contexts.
+The JSON output preserves each question, retrieved context, answer, metric
+breakdown, token counts, latency, and resource samples.
