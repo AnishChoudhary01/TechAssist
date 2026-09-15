@@ -1,0 +1,295 @@
+{
+  "generated_at_utc": "2026-09-14T09:05:44.201206+00:00",
+  "summary": {
+    "total_tests": 8,
+    "passed": 0,
+    "failed": 8,
+    "pass_rate": 0.0,
+    "guardrail_accuracy": 75.0,
+    "false_acceptance": 2,
+    "false_rejection": 0,
+    "correct_rejection_rate": 66.7,
+    "relevance_pass_rate": 100.0,
+    "grounding_pass_rate": 50.0,
+    "refusal_accuracy": 0.0,
+    "unsupported_claim_rate": 0.0
+  },
+  "results": [
+    {
+      "id": "g-valid-install",
+      "category": "valid_technical_support",
+      "question": "How do I troubleshoot a Python ModuleNotFoundError after installation?",
+      "expected_behavior": "allow",
+      "expected_answerable": true,
+      "actual_behavior": "ALLOWED",
+      "guardrail_result": "ALLOWED",
+      "llm_called": true,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "To troubleshoot a Python ModuleNotFoundError after installation, follow these steps:\n\n1. **Check for Missing Python Installation**:\n   - Ensure that Python is installed on your system. You can check this by running:\n     ```bash\n     python --version\n     ```\n   - If Python is not installed, download and install it from the official Python website.\n\n2. **Verify Python Installation Path**:\n   - Ensure that Python is added to your system's PATH. You can check this by running:\n     ```bash\n     echo $PATH\n     ```\n   - If Python is not in your PATH, you can add it by editing your shell configuration file (e.g., `.bashrc`, `.bash_profile`, `.zshrc`):\n     ```bash\n     export PATH=$PATH:/usr/local/bin\n     source ~/.bashrc\n     ```\n   - Ensure that the Python executable is in your system's PATH.\n\n3. **Check for Python Virtual Environment**:\n   - If you are using a virtual environment, ensure that it is activated. You can activate a virtual environment by running:\n     ```bash\n     source venv/bin/activate\n     ```\n   - If the virtual environment is not activated, activate it by running:\n     ```bash\n     python -",
+      "retrieved_context": [
+        {
+          "source": "acer_manual.pdf",
+          "content": "58 - Frequently asked questions Troubleshooting This chapter shows you how to deal with common system problems. Read it before calling a technician if a problem occurs. Solutions to more serious problems require opening up the computer. Do not attempt to open the computer yourself; contact your dealer or authorized service center for assistance. Troubleshooting tips This computer incorporates an advanced design that delivers onscreen error message reports to help you solve problems. If the system reports an error message or an error symptom occurs, see \"Error messages\" below. If the problem cannot be resolved, contact your dealer. Error messages If you receive an error message, note the message and take the corrective action. The following table lists the error messages in alphabetical order together with the recommended course of action. Error messages Corrective action CMOS battery bad Contact your dealer or an authorized service center. CMOS checksum error Contact your dealer or an",
+          "distance": 1.001932144165039
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": ". Error messages Corrective action CMOS battery bad Contact your dealer or an authorized service center. CMOS checksum error Contact your dealer or an authorized service center. Disk boot failure Insert a system (bootable) disk, then press Enter to reboot. Equipment configuration error Press F2 (during POST) to enter the BIOS utility, then press Exit in the BIOS utility to reboot. Hard disk 0 error Contact your dealer or an authorized service center. Hard disk 0 extended type error Contact your dealer or an authorized service center. Frequen tl y as ked ques ti ons",
+          "distance": 1.064967393875122
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "Frequently asked questions - 59 If you still encounter problems after going through the corrective measures, please contact your dealer or an authorized service center for assistance. I/O parity error Contact your dealer or an authorized service center. Keyboard error or no keyboard connected Contact your dealer or an authorized service center. Keyboard interface error Contact your dealer or an authorized service center. Memory size mismatch Press F2 (during POST) to enter the BIOS utility, then press Exit in the BIOS utility to reboot. Error messages Corrective action",
+          "distance": 1.0882551670074463
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "40 - BIOS utility BIOS UTILITY The BIOS utility is a hardware conf iguration program built into your computer's BIOS. Your computer is already properly configured and optimized, and you do not normally need to run this utility. However, if you encounter configuration problems, you may need to run it. To activate the BIOS utility, press F2 while the computer logo is being displayed. Boot sequence To set the boot sequence in the BIOS utility, activate the BIOS utility, then select Boot from the categories listed on the top of the screen. Setting passwords To set a password on boot, activate the BIOS utility, then select Security from the categories listed on the top of the screen. Find Set Supervisor Password and enter a password to enable this feature. Once you have entered a password for this feature, you may then enable/disable Password on Boot. Remember to select F10 to properly save and exit the BIOS utility when you are done making changes.",
+          "distance": 1.0961546897888184
+        }
+      ],
+      "checks": {
+        "relevance": true,
+        "grounding": false,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": true,
+        "response_format": true
+      },
+      "guardrail_passed": true,
+      "overall_passed": false
+    },
+    {
+      "id": "g-valid-db",
+      "category": "valid_technical_support",
+      "question": "How should I diagnose a database connection error?",
+      "expected_behavior": "allow",
+      "expected_answerable": true,
+      "actual_behavior": "ALLOWED",
+      "guardrail_result": "ALLOWED",
+      "llm_called": true,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "To diagnose a database connection error, follow these steps:\n\n1. **Check CMOS Battery**: Ensure that the CMOS battery is functioning properly. If the battery is not charged, it can cause issues with the system's connection to the database.\n\n2. **Check CMOS Checksum**: Verify that the CMOS checksum is correct. This is crucial for the system to recognize the correct hardware and software.\n\n3. **Check Hard Disk 0**: If the hard disk 0 is not functioning correctly, it can cause the system to fail to connect to the database.\n\n4. **Check Disk Boot Failure**: If the disk boot fails, it can prevent the system from booting up and causing the database connection error.\n\n5. **Check Equipment Configuration**: Ensure that all necessary hardware is properly configured for database connections.\n\n6. **Check Hard Disk 0 Extended Type**: If the hard disk 0 is an extended type, it can cause issues with the system's connection to the database.\n\n7. **Check Frequencies as Kept Questions**: If you still encounter problems after going through the corrective measures, please contact your dealer or an authorized service center for assistance.\n\n8. **Check Memory Size Mismatch**: Ensure that the memory size is compatible with the hardware and software.\n\n9",
+      "retrieved_context": [
+        {
+          "source": "acer_manual.pdf",
+          "content": "58 - Frequently asked questions Troubleshooting This chapter shows you how to deal with common system problems. Read it before calling a technician if a problem occurs. Solutions to more serious problems require opening up the computer. Do not attempt to open the computer yourself; contact your dealer or authorized service center for assistance. Troubleshooting tips This computer incorporates an advanced design that delivers onscreen error message reports to help you solve problems. If the system reports an error message or an error symptom occurs, see \"Error messages\" below. If the problem cannot be resolved, contact your dealer. Error messages If you receive an error message, note the message and take the corrective action. The following table lists the error messages in alphabetical order together with the recommended course of action. Error messages Corrective action CMOS battery bad Contact your dealer or an authorized service center. CMOS checksum error Contact your dealer or an",
+          "distance": 0.7277482748031616
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": ". Error messages Corrective action CMOS battery bad Contact your dealer or an authorized service center. CMOS checksum error Contact your dealer or an authorized service center. Disk boot failure Insert a system (bootable) disk, then press Enter to reboot. Equipment configuration error Press F2 (during POST) to enter the BIOS utility, then press Exit in the BIOS utility to reboot. Hard disk 0 error Contact your dealer or an authorized service center. Hard disk 0 extended type error Contact your dealer or an authorized service center. Frequen tl y as ked ques ti ons",
+          "distance": 0.7939478158950806
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "Frequently asked questions - 59 If you still encounter problems after going through the corrective measures, please contact your dealer or an authorized service center for assistance. I/O parity error Contact your dealer or an authorized service center. Keyboard error or no keyboard connected Contact your dealer or an authorized service center. Keyboard interface error Contact your dealer or an authorized service center. Memory size mismatch Press F2 (during POST) to enter the BIOS utility, then press Exit in the BIOS utility to reboot. Error messages Corrective action",
+          "distance": 0.8191107511520386
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "etting to talk to friends and family about their experiences or to check reviews and consumer reports. The ISP you select will provide instructions on how to connect to the internet (you may need additional software or a special \u2018box\u2019 that connects to your phone line). Connection types Depending on your computer model, your location and your communication needs, you have several ways to connect to the internet. Dial-up Some computers include a telep hone dial-up (\u2018modem\u2019) connector. This allows you to connect to the internet using your telephone line. With a dial-up connection, you cannot use the modem and the telephone simultaneously on a single phone line. This type of connection is recommended only if you have limited use of the",
+          "distance": 0.852484941482544
+        }
+      ],
+      "checks": {
+        "relevance": true,
+        "grounding": false,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": true,
+        "response_format": true
+      },
+      "guardrail_passed": true,
+      "overall_passed": false
+    },
+    {
+      "id": "g-politics",
+      "category": "out_of_scope",
+      "question": "Who is the president of India?",
+      "expected_behavior": "reject_out_of_scope",
+      "expected_answerable": false,
+      "actual_behavior": "OUT_OF_SCOPE",
+      "guardrail_result": "OUT_OF_SCOPE",
+      "llm_called": false,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "I can only help with questions related to the technical-support knowledge available in this application.",
+      "retrieved_context": [],
+      "checks": {
+        "relevance": true,
+        "grounding": true,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": false,
+        "response_format": true
+      },
+      "guardrail_passed": true,
+      "overall_passed": false
+    },
+    {
+      "id": "g-poem",
+      "category": "out_of_scope",
+      "question": "Write me a romantic poem.",
+      "expected_behavior": "reject_out_of_scope",
+      "expected_answerable": false,
+      "actual_behavior": "OUT_OF_SCOPE",
+      "guardrail_result": "OUT_OF_SCOPE",
+      "llm_called": false,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "I can only help with questions related to the technical-support knowledge available in this application.",
+      "retrieved_context": [],
+      "checks": {
+        "relevance": true,
+        "grounding": true,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": false,
+        "response_format": true
+      },
+      "guardrail_passed": true,
+      "overall_passed": false
+    },
+    {
+      "id": "g-unsupported",
+      "category": "insufficient_knowledge",
+      "question": "How do I configure the unsupported quantum teleport feature in this application?",
+      "expected_behavior": "reject_insufficient_knowledge",
+      "expected_answerable": false,
+      "actual_behavior": "ALLOWED",
+      "guardrail_result": "ALLOWED",
+      "llm_called": true,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "To configure the unsupported quantum teleport feature in this application, follow these steps:\n\n1. **Check Bluetooth Connection**: Ensure that the Bluetooth connection is enabled on both your computer and the device you wish to connect to. You can do this by selecting the device you wish to pair from the list of discovered devices and entering the code on the device to proceed the connection.\n\n2. **Enable Bluetooth**: If Bluetooth is not enabled on both devices, you can enable it by selecting the Network, Sound and Battery icon in the lower right-hand corner of the screen and opening the Quick settings pane. From here, you can enable or disable Bluetooth or right-click on Bluetooth > Go to Settings to enter the Bluetooth settings. Note Some devices using older versions of the Bluetooth technology require both devices to enter a PIN. In the case of one of the devices not having any inputs (as in a headset), the passcode is hardcoded into the device (usually \"0000\" or \"1234\"). Consult your device\u2019s user manual for more information.\n\n3. **Pair Devices**: After enabling Bluetooth, pair the devices. This means it must first be authenticated for security purposes. You only need to pair once. After that, simply turning on the Bluetooth adapter of both devices will connect them",
+      "retrieved_context": [
+        {
+          "source": "acer_manual.pdf",
+          "content": "32 - Using a Bluetooth connection 4.Select the device you wish to pair from the list of discovered devices. 5.After pairing, if there is a code displaying on the screen, enter that code on the device to proceed the connection. You can also enter the Bluetoo th settings by selecting the Network, Sound and Battery icon in the lower right-hand corner of the screen to open the Quick settings pane. From here, you can enable or disable Bluetooth or right-click on Bluetooth > Go to Settings to enter the Bluetooth settings. Note Some devices using older versions of the Bluetooth technology require both devices to enter a PIN. In the case of one of the devices not having any inputs (as in a headset), the passcode is hardcoded into the device (usually \"0000\" or \"1234\"). Consult your device\u2019s user manual for more information.",
+          "distance": 0.9447018504142761
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "uthenticated for security purposes. You only need to pair once. After that, simply turning on the Bluetooth adapter of both devices will connect them. Bluetooth on your computer is disabled by default. To enable your computer\u2019s Bluetooth adapter, do the following: 1.Press the Windows key or select the Windows Start button > Settings > Bluetooth & devices , and click the toggle under Bluetooth to enable/disable it. 2.Click on Add device then select the device that you want to add. 3.Your computer will automatically start searching for devices, as well as make itself visible to other devices. Note Please check your devices owner\u2019s manual to determine how to turn on its Bluetooth adapter.",
+          "distance": 0.9473440647125244
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "Using a Bluetooth connection - 31 USING A B LUETOOTH CONNECTION Bluetooth is a technology enabling you to transfer data wirelessly over short distances between many differ ent types of devices. Bluetooth- enabled devices include computers, cell phones, tablets, wireless headsets, and keyboards. To use Bluetooth, you must ensure the following: 1.Bluetooth is enabled on both devices. 2.Your devices are \"paired\" (or connected). Enabling and disabling Bluetooth The Bluetooth adapter must be enabled on both devices. For your computer, this may be an external switch, a software setting, or a separate Bluetooth dongle plugged into the computer\u2019s USB port (if no internal Bluetooth adapter is available). Enable Bluetooth and add a device Every new device must first be \"paired\" with your computer\u2019s Bluetooth adapter. This means it must first be authenticated for security purposes. You only need to pair once. After that, simply turning on the Bluetooth adapter of both devices will connect them.",
+          "distance": 0.9926461577415466
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "40 - BIOS utility BIOS UTILITY The BIOS utility is a hardware conf iguration program built into your computer's BIOS. Your computer is already properly configured and optimized, and you do not normally need to run this utility. However, if you encounter configuration problems, you may need to run it. To activate the BIOS utility, press F2 while the computer logo is being displayed. Boot sequence To set the boot sequence in the BIOS utility, activate the BIOS utility, then select Boot from the categories listed on the top of the screen. Setting passwords To set a password on boot, activate the BIOS utility, then select Security from the categories listed on the top of the screen. Find Set Supervisor Password and enter a password to enable this feature. Once you have entered a password for this feature, you may then enable/disable Password on Boot. Remember to select F10 to properly save and exit the BIOS utility when you are done making changes.",
+          "distance": 1.0208340883255005
+        }
+      ],
+      "checks": {
+        "relevance": true,
+        "grounding": false,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": false,
+        "response_format": true
+      },
+      "guardrail_passed": false,
+      "overall_passed": false
+    },
+    {
+      "id": "g-unsupported-request",
+      "category": "unsupported_request",
+      "question": "How do I enable the unreleased enterprise-only feature in this application?",
+      "expected_behavior": "reject_insufficient_knowledge",
+      "expected_answerable": false,
+      "actual_behavior": "ALLOWED",
+      "guardrail_result": "ALLOWED",
+      "llm_called": true,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "To enable the unreleased enterprise-only feature in your Windows 17 application, follow these steps:\n\n1. **Check for Windows Updates:**\n   - Press the Windows key or select the Windows Start button > Settings > Windows Update.\n   - Select Advanced options to configure the settings.\n   - Look for the option to check for updates. If it's not available, you may need to install the latest version of Windows.\n   - Click \"Check for updates\" to download and install any available updates.\n\n2. **Review the Windows Update Log:**\n   - Open the Windows Update log by searching for \"Windows Update\" in the Start menu or by going to `Control Panel > Update and Security > Windows Update`.\n   - Look for any error messages or warnings related to the unreleased feature.\n   - If you find any, follow the instructions provided to resolve the issue.\n\n3. **Check for Updates from Microsoft:**\n   - Visit the Microsoft Update website to check for updates for your Windows 17 version.\n   - Download and install any available updates.\n\n4. **Contact Microsoft Support:**\n   - If the issue persists, contact Microsoft Support for further assistance.\n   - Provide them with the error messages or warnings you found in the Windows Update log.\n\n5.",
+      "retrieved_context": [
+        {
+          "source": "acer_manual.pdf",
+          "content": "The Windows OS Desktop - 17 THE W INDOWS OS D ESKTOP 1 23 4 7865 Note Screen simulated, subject to change. Feature availability and rollout timing varies by market and device. # Item Description 1 Settings Changes the apps settings for your computer. 2 Widgets Provides the weather, news, stocks, and sports information. 3S t a r t Launches apps, through Pinned, Recommended, or All apps. 4S e a r c h Types in the texts to search on your computer and the Internet. 5 Task View Allows to switch between running applications and add the virtual desktop. 6 Power Shut down, sleep or restart your computer.",
+          "distance": 1.064049482345581
+        },
+        {
+          "source": "godrej_manual.pdf",
+          "content": "ny time, without prior notice, without liability, and without assigning any reason whatsoever , to add / alter / modify / change or vary any / all the offer terms. \u2022 Exclusions: o The extended warranty offer is not applicable for institutional sale or bulk orders or for Non-Domestic usage. o The extended warranty offer is not applicable for institutions or commercial places which are being governed by specific agreements with the Company. o Jet Pump Service is not covered under any warranty. It shall be chargeable as per the prevailing industry practice. o The extended warranty offer is not applicable if the installation is done outside India. o The extended warranty offer is not applicable if the unit is installed in the abnormal condition, with improper electrical wirings, voltage fluctuations, external conditions and improper use. o Any defects / damages arising by accidents / alterations / misuse / physical abuse / neglect / use of spurious components / fire / floo d / earthquake",
+          "distance": 1.0740368366241455
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "42 - Power management 3.Select Change settings that are currently unavailable. 4.Scroll down and disable Turn on fast start-up. 5.Select Save changes.",
+          "distance": 1.1021647453308105
+        },
+        {
+          "source": "acer_manual.pdf",
+          "content": "The Windows OS Desktop - 19 How do I check for Windows updates? Press the Windows key or select the Windows Start button > Settings > Windows Update . Select Advanced options to configure the settings. Where can I get more information? For more information please visit the following pages: \u2022 Windows 11 information: support.microsoft.com/Windows \u2022 Support FAQs: support.acer.com",
+          "distance": 1.1222888231277466
+        }
+      ],
+      "checks": {
+        "relevance": true,
+        "grounding": false,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": false,
+        "response_format": true
+      },
+      "guardrail_passed": false,
+      "overall_passed": false
+    },
+    {
+      "id": "g-empty",
+      "category": "empty_invalid",
+      "question": "...",
+      "expected_behavior": "reject_empty",
+      "expected_answerable": false,
+      "actual_behavior": "EMPTY_OR_MEANINGLESS",
+      "guardrail_result": "EMPTY_OR_MEANINGLESS",
+      "llm_called": false,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "Please enter a clear technical-support question.",
+      "retrieved_context": [],
+      "checks": {
+        "relevance": true,
+        "grounding": true,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": false,
+        "response_format": true
+      },
+      "guardrail_passed": true,
+      "overall_passed": false
+    },
+    {
+      "id": "g-long",
+      "category": "excessively_long",
+      "question": "How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? How do I troubleshoot a Python error? ",
+      "expected_behavior": "reject_too_long",
+      "expected_answerable": false,
+      "actual_behavior": "INPUT_TOO_LONG",
+      "guardrail_result": "INPUT_TOO_LONG",
+      "llm_called": false,
+      "without_guardrail_llm_called": true,
+      "model": "qwen2.5-coder:0.5b-instruct",
+      "actual_response": "Please shorten your technical-support question to 2000 characters or fewer.",
+      "retrieved_context": [],
+      "checks": {
+        "relevance": true,
+        "grounding": true,
+        "unsupported_claims": true,
+        "answerability": true,
+        "refusal_behaviour": false,
+        "response_format": true
+      },
+      "guardrail_passed": true,
+      "overall_passed": false
+    }
+  ]
+}

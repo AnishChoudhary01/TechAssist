@@ -13,13 +13,19 @@ function element(tag, text, className = "") { const node = document.createElemen
 function errorDetail(data, fallback) { const detail = data && data.detail; return typeof detail === "string" && detail ? detail : Array.isArray(detail) && detail.length ? detail.map((item) => item.msg || JSON.stringify(item)).join(" ") : fallback; }
 async function readJson(response) { const text = await response.text(); if (!text) throw new Error(`Request failed (${response.status}).`); try { return JSON.parse(text); } catch { throw new Error(text.trim() || `Request failed (${response.status}).`); } }
 function setUploadStatus(text, className = "") { uploadStatus.textContent = text; uploadStatus.className = `notice ${className ? `notice-${className}` : ""}`; uploadStatus.hidden = !text; }
-function addDocument(result) {
-  if (!uploadedCount) indexedDocuments.replaceChildren();
-  uploadedCount += 1; documentCount.textContent = `(${uploadedCount})`;
-  const item = document.createElement("div"); item.className = "document-item";
-  const details = document.createElement("div"); details.append(element("strong", result.source), element("small", `${result.chunks_indexed} indexed chunk${result.chunks_indexed === 1 ? "" : "s"}`));
-  item.append(element("span", "▣", "file-icon"), details, element("span", "Indexed", "indexed")); indexedDocuments.append(item);
+function renderDocuments(documents) {
+  uploadedCount = documents.length; documentCount.textContent = `(${uploadedCount})`; indexedDocuments.replaceChildren();
+  if (!documents.length) { indexedDocuments.append(element("p", "No documents indexed yet.", "empty-documents")); knowledgeState.textContent = "Waiting"; knowledgeState.className = "index-state"; return; }
+  documents.forEach((documentRecord) => {
+    const item = document.createElement("div"); item.className = "document-item";
+    const details = document.createElement("div"); details.append(element("strong", documentRecord.filename), element("small", `${documentRecord.chunks_indexed} indexed chunk${documentRecord.chunks_indexed === 1 ? "" : "s"}${documentRecord.category ? ` · ${documentRecord.category}` : ""}`));
+    item.append(element("span", "▣", "file-icon"), details, element("span", documentRecord.status === "indexed" ? "Indexed" : documentRecord.status, "indexed")); indexedDocuments.append(item);
+  });
   knowledgeState.textContent = "Ready"; knowledgeState.className = "index-state";
+}
+async function loadDocuments() {
+  try { const response = await fetch("/api/v1/knowledge/documents"); const data = await readJson(response); if (!response.ok) throw new Error(errorDetail(data, "Could not load documents.")); renderDocuments(data.documents || []); }
+  catch (error) { knowledgeState.textContent = "Unavailable"; knowledgeState.className = "index-state"; setUploadStatus(error.message, "error"); }
 }
 
 fileInput.addEventListener("change", () => { fileLabel.textContent = fileInput.files[0]?.name || "Drag & drop files here"; });
@@ -28,5 +34,6 @@ fileInput.addEventListener("change", () => { fileLabel.textContent = fileInput.f
 dropZone.addEventListener("drop", (event) => { if (event.dataTransfer.files.length) { fileInput.files = event.dataTransfer.files; fileLabel.textContent = event.dataTransfer.files[0].name; } });
 uploadForm.addEventListener("submit", async (event) => {
   event.preventDefault(); if (!fileInput.files[0]) return; uploadButton.disabled = true; setUploadStatus("Indexing document…");
-  try { const response = await fetch("/api/v1/knowledge/documents", { method: "POST", body: new FormData(uploadForm) }); const data = await readJson(response); if (!response.ok) throw new Error(errorDetail(data, "Document upload failed.")); addDocument(data); setUploadStatus(`${data.source} added to the knowledge base.`, "success"); uploadForm.reset(); fileLabel.textContent = "Drag & drop files here"; } catch (error) { setUploadStatus(error.message, "error"); } finally { uploadButton.disabled = false; }
+  try { const response = await fetch("/api/v1/knowledge/documents", { method: "POST", body: new FormData(uploadForm) }); const data = await readJson(response); if (!response.ok) throw new Error(errorDetail(data, "Document upload failed.")); await loadDocuments(); setUploadStatus(`${data.source} added to the knowledge base.`, "success"); uploadForm.reset(); fileLabel.textContent = "Drag & drop files here"; } catch (error) { setUploadStatus(error.message, "error"); } finally { uploadButton.disabled = false; }
 });
+loadDocuments();

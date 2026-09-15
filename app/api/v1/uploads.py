@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
 from app.core.config import Settings, get_settings
-from app.models.knowledge import IngestionResult
+from app.models.knowledge import DocumentListResponse, IngestionResult
 from app.services.orchestrator import RAGServiceClient, UpstreamServiceError
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge base"])
@@ -28,5 +28,14 @@ async def upload_knowledge_document(
             content_type=file.content_type,
             category=category,
         )
+    except UpstreamServiceError as error:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"{error.service} failed: {error.detail}") from error
+
+
+@router.get("/documents", response_model=DocumentListResponse)
+async def list_knowledge_documents(rag_client: RAGServiceClient = Depends(get_rag_client)) -> DocumentListResponse:
+    """Expose the RAG service's durable document library to the browser."""
+    try:
+        return await rag_client.list_documents()
     except UpstreamServiceError as error:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=f"{error.service} failed: {error.detail}") from error

@@ -1,0 +1,19 @@
+[
+  {"id":"g-valid-install","category":"valid_technical_support","question":"How do I troubleshoot a Python ModuleNotFoundError after installation?","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-valid-db","category":"valid_technical_support","question":"How should I diagnose a database connection error?","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-valid-reboot","category":"valid_technical_support","question":"How do I reboot my laptop?","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-valid-wifi","category":"valid_technical_support","question":"How do I connect to Wi-Fi?","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-valid-slow","category":"valid_technical_support","question":"My laptop is running slowly.","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-valid-windows-update","category":"valid_technical_support","question":"How do I update Windows?","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-valid-printer","category":"valid_technical_support","question":"How do I fix a printer connection?","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-valid-startup","category":"valid_technical_support","question":"My computer is not starting.","expected_behavior":"allow","expected_answerable":true},
+  {"id":"g-politics","category":"out_of_scope","question":"Who is the president of India?","expected_behavior":"reject_out_of_scope","expected_answerable":false},
+  {"id":"g-poem","category":"out_of_scope","question":"Write me a romantic poem.","expected_behavior":"reject_out_of_scope","expected_answerable":false},
+  {"id":"g-joke","category":"out_of_scope","question":"Tell me a joke.","expected_behavior":"reject_out_of_scope","expected_answerable":false},
+  {"id":"g-cricket","category":"out_of_scope","question":"What is today's cricket score?","expected_behavior":"reject_out_of_scope","expected_answerable":false},
+  {"id":"g-vacation","category":"out_of_scope","question":"Plan my vacation.","expected_behavior":"reject_out_of_scope","expected_answerable":false},
+  {"id":"g-unsupported","category":"insufficient_knowledge","question":"How do I configure the unsupported quantum teleport feature in this application?","expected_behavior":"reject_insufficient_knowledge","expected_answerable":false},
+  {"id":"g-unsupported-request","category":"unsupported_request","question":"How do I enable the unreleased enterprise-only feature in this application?","expected_behavior":"reject_insufficient_knowledge","expected_answerable":false},
+  {"id":"g-empty","category":"empty_invalid","question":"...","expected_behavior":"reject_empty","expected_answerable":false},
+  {"id":"g-long","category":"excessively_long","question":"How do I troubleshoot a Python error? " ,"expected_behavior":"reject_too_long","expected_answerable":false,"repeat_to_exceed_max":true}
+]

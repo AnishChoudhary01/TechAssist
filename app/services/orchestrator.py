@@ -6,9 +6,10 @@ from typing import Protocol
 import httpx
 
 from app.core.config import Settings
-from app.models.knowledge import IngestionResult, RetrievedChunk, RetrievalResponse
+from app.models.knowledge import DocumentListResponse, IngestionResult, RetrievedChunk, RetrievalResponse
 from app.models.llm import GenerationResponse
 from app.models.support import ProcessingStep
+from app.services.guardrails import GuardrailDecision, GuardrailService
 
 
 SYSTEM_PROMPT = """You are TechAssist, a careful AI technical support assistant.
@@ -90,6 +91,19 @@ class RAGServiceClient:
         except ValueError as error:
             raise UpstreamServiceError("RAG service", f"returned an invalid payload: {error}") from error
 
+    async def list_documents(self) -> DocumentListResponse:
+        try:
+            async with httpx.AsyncClient(timeout=self._timeout, trust_env=False) as client:
+                response = await client.get(f"{self._base_url}/v1/knowledge/documents")
+                response.raise_for_status()
+            return DocumentListResponse.model_validate(response.json())
+        except httpx.HTTPStatusError as error:
+            raise UpstreamServiceError("RAG service", f"returned HTTP {error.response.status_code}: {_response_detail(error.response)}") from error
+        except httpx.RequestError as error:
+            raise UpstreamServiceError("RAG service", f"connection failed: {error}") from error
+        except ValueError as error:
+            raise UpstreamServiceError("RAG service", f"returned an invalid payload: {error}") from error
+
 
 class LLMServiceClient:
     """HTTP client for the independent Ollama-backed LLM service."""
@@ -131,9 +145,10 @@ def _response_detail(response: httpx.Response) -> str:
 class TechnicalSupportOrchestrator:
     """Retrieve relevant context, then request a grounded LLM answer."""
 
-    def __init__(self, retriever: ContextRetriever, generator: ResponseGenerator) -> None:
+    def __init__(self, retriever: ContextRetriever, generator: ResponseGenerator, guardrails: GuardrailService | None = None) -> None:
         self._retriever = retriever
         self._generator = generator
+        self._guardrails = guardrails
 
     async def answer(
         self,
@@ -141,12 +156,40 @@ class TechnicalSupportOrchestrator:
         model: str | None = None,
         use_rag: bool = True,
     ) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep]]:
-        """Optionally retrieve context, then generate an answer and record the processing trace."""
+        """Compatibility wrapper returning the original support answer tuple."""
+        answer, model_name, sources, trace, _, _ = await self.answer_with_metadata(question, model, use_rag)
+        return answer, model_name, sources, trace
+
+    async def answer_with_metadata(
+        self, question: str, model: str | None = None, use_rag: bool = True, guardrails_enabled: bool = True,
+    ) -> tuple[str, str, list[RetrievedChunk], list[ProcessingStep], GuardrailDecision, bool]:
+        """Answer only after deterministic input and retrieval-sufficiency checks pass."""
+        allowed = GuardrailDecision(True, "ALLOWED")
+        if guardrails_enabled and self._guardrails:
+            decision = self._guardrails.validate_input(question)
+            if not decision.allowed:
+                return decision.response or "This request cannot be answered.", model or "not-called", [], [ProcessingStep(stage="Input guardrail", service="API orchestrator", detail=f"Rejected before LLM call: {decision.category}.")], decision, False
         if use_rag:
             retrieval_started = perf_counter()
             sources = await self._retriever.retrieve(question)
             retrieval_duration = int((perf_counter() - retrieval_started) * 1000)
             context = self._format_context(sources)
+            retrieval_guardrail_trace: list[ProcessingStep] = []
+            if guardrails_enabled and self._guardrails:
+                retrieval_decision = self._guardrails.validate_retrieval(sources)
+                if not retrieval_decision.allowed:
+                    # Retrieval quality is a grounding signal, not an input-scope
+                    # decision. A valid support question must still reach the LLM;
+                    # the prompt below explicitly identifies missing context so the
+                    # answer can be cautious instead of pretending it is sourced.
+                    retrieval_guardrail_trace.append(
+                        ProcessingStep(
+                            stage="RAG sufficiency guardrail",
+                            service="RAG service",
+                            detail="Retrieved context was insufficient; continuing with a cautious, unsourced response.",
+                            duration_ms=retrieval_duration,
+                        )
+                    )
             prompt = (
                 f"Technical support question:\n{question}\n\n"
                 f"Knowledge-base context:\n{context}\n\n"
@@ -154,6 +197,7 @@ class TechnicalSupportOrchestrator:
             )
             source_labels = sorted({source.source for source in sources})
             retrieval_trace = [
+                *retrieval_guardrail_trace,
                 ProcessingStep(
                     stage="Knowledge base / RAG retrieval",
                     service="RAG service",
@@ -213,7 +257,7 @@ class TechnicalSupportOrchestrator:
                 duration_ms=generation_duration,
             ),
         ]
-        return answer, model, sources, trace
+        return answer, model, sources, trace, allowed, True
 
     @staticmethod
     def _format_context(sources: list[RetrievedChunk]) -> str:

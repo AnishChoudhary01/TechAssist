@@ -23,6 +23,9 @@ class Settings:
     rag_top_k: int
     chunk_size: int
     chunk_overlap: int
+    max_question_length: int = 2000
+    rag_max_distance: float = 1.2
+    rag_min_context_characters: int = 80
 
 
 @lru_cache
@@ -57,4 +60,7 @@ def get_settings() -> Settings:
         rag_top_k=int(os.getenv("RAG_TOP_K", "4")),
         chunk_size=int(os.getenv("CHUNK_SIZE", "1000")),
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "150")),
+        max_question_length=int(os.getenv("MAX_QUESTION_LENGTH", "2000")),
+        rag_max_distance=float(os.getenv("RAG_MAX_DISTANCE", "1.2")),
+        rag_min_context_characters=int(os.getenv("RAG_MIN_CONTEXT_CHARACTERS", "80")),
     )

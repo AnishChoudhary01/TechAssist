@@ -57,6 +57,11 @@ def create_app() -> FastAPI:
         """Serve the model evaluation workspace."""
         return FileResponse(web_directory / "evaluation.html")
 
+    @app.get("/guardrails", include_in_schema=False)
+    async def guardrails_ui() -> FileResponse:
+        """Serve the dedicated guardrail and AI output testing workspace."""
+        return FileResponse(web_directory / "guardrails.html")
+
     @app.get("/health", tags=["health"])
     async def health_check() -> dict[str, str]:
         """Return service liveness without making an upstream LLM request."""

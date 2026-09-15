@@ -35,6 +35,8 @@ class SupportResponse(BaseModel):
     use_rag: bool = True
     sources: list[RetrievedChunk] = Field(default_factory=list)
     processing_trace: list["ProcessingStep"] = Field(default_factory=list)
+    guardrail_result: str = "ALLOWED"
+    llm_called: bool = True
 
 
 class ProcessingStep(BaseModel):

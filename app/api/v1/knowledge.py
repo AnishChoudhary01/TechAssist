@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
 from app.core.config import Settings, get_settings
-from app.models.knowledge import DirectoryIngestionResult, IngestionResult
+from app.models.knowledge import DirectoryIngestionResult, DocumentListResponse, IngestionResult
 from app.rag.chunking import TextChunker
 from app.rag.documents import DocumentLoader, UnsupportedDocumentError
 from app.rag.service import KnowledgeBaseService
@@ -38,6 +38,14 @@ async def ingest_document(
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Ollama embedding service is unavailable.") from error
     except OllamaResponseError as error:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Ollama returned invalid embeddings.") from error
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+
+
+@router.get("/documents", response_model=DocumentListResponse)
+async def list_documents(service: KnowledgeBaseService = Depends(get_knowledge_base_service)) -> DocumentListResponse:
+    """List documents from the same persistent collection used for retrieval."""
+    return DocumentListResponse(documents=service.documents())
 
 
 @router.post("/index-directory", response_model=DirectoryIngestionResult)

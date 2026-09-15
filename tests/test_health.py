@@ -11,6 +11,15 @@ def test_health_check() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_guardrails_page_is_available_from_navigation() -> None:
+    client = TestClient(create_app())
+    response = client.get("/guardrails")
+
+    assert response.status_code == 200
+    assert "Run Guardrail Tests" in response.text
+    assert 'href="/guardrails"' in client.get("/workspace").text
+
+
 class StubSupportService:
     def __init__(self) -> None:
         self.model: str | None = None

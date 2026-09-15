@@ -12,6 +12,23 @@ class IngestionResult(BaseModel):
     chunks_indexed: int
 
 
+class IndexedDocument(BaseModel):
+    """One document represented by persisted chunks in the knowledge base."""
+
+    document_id: str
+    filename: str
+    status: str
+    chunks_indexed: int
+    category: str | None = None
+    indexed_at: str | None = None
+
+
+class DocumentListResponse(BaseModel):
+    """The durable document library exposed to both browser pages."""
+
+    documents: list[IndexedDocument]
+
+
 class DirectoryIngestionResult(BaseModel):
     """Summary for a directory-wide ingestion operation."""
 

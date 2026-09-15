@@ -12,6 +12,7 @@ from app.services.orchestrator import (
     TechnicalSupportOrchestrator,
     UpstreamServiceError,
 )
+from app.services.guardrails import GuardrailService
 
 router = APIRouter(prefix="/support", tags=["technical support"])
 
@@ -21,6 +22,7 @@ def get_support_service(settings: Settings = Depends(get_settings)) -> Technical
     return TechnicalSupportOrchestrator(
         retriever=RAGServiceClient(settings),
         generator=LLMServiceClient(settings),
+        guardrails=GuardrailService(settings.max_question_length, settings.rag_max_distance, settings.rag_min_context_characters),
     )
 
 
@@ -41,7 +43,12 @@ async def ask_support_question(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="The selected model is not available.")
     started = perf_counter()
     try:
-        answer, model, sources, trace = await service.answer(question.question, question.model, question.use_rag)
+        if hasattr(service, "answer_with_metadata"):
+            answer, model, sources, trace, decision, llm_called = await service.answer_with_metadata(question.question, question.model, question.use_rag)
+        else:  # Compatibility with existing service doubles and integrations.
+            answer, model, sources, trace = await service.answer(question.question, question.model, question.use_rag)
+            from app.services.guardrails import GuardrailDecision
+            decision, llm_called = GuardrailDecision(True, "ALLOWED"), True
     except UpstreamServiceError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -50,9 +57,12 @@ async def ask_support_question(
 
     total_duration = int((perf_counter() - started) * 1000)
     final_detail = (
-        "Returned the grounded troubleshooting answer and its retrieved sources to the user."
+        f"Guardrail rejected the request ({decision.category}); the LLM was not called."
+        if not llm_called
+        else ("Returned the grounded troubleshooting answer and its retrieved sources to the user."
         if question.use_rag
         else "Returned the direct LLM answer. Retrieval was not used."
+        )
     )
     return SupportResponse(
         answer=answer,
@@ -73,4 +83,6 @@ async def ask_support_question(
                 duration_ms=total_duration,
             ),
         ],
+        guardrail_result=decision.category,
+        llm_called=llm_called,
     )
